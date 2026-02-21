@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { registerPlugin } from '@capacitor/core'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { LocalNotifications } from '@capacitor/local-notifications'
-import { BookOpenText, Check, Clock3, Plus, Settings, Trash2 } from 'lucide-react'
+import { Activity, BookOpenText, Check, Clock3, Plus, Settings, Sparkles, Trash2 } from 'lucide-react'
 
 const PLAN_STORAGE_KEY = 'studyflow-plans'
 const LEGACY_MEMO_STORAGE_KEY = 'studyflow-memos'
@@ -133,6 +133,7 @@ function formatPlanTime(timestamp) {
 }
 
 function App() {
+  const [activeMainTab, setActiveMainTab] = useState('study')
   const [activeTab, setActiveTab] = useState('focus')
   const [isRunning, setIsRunning] = useState(false)
   const [plans, setPlans] = useState(() => loadPlans())
@@ -400,7 +401,13 @@ function App() {
     setPlans((previous) => previous.filter((plan) => plan.id !== id))
   }
 
-  const navItems = [
+  const mainNavItems = [
+    { id: 'study', label: '\u5b66\u4e60', icon: BookOpenText },
+    { id: 'interest', label: '\u5174\u8da3', icon: Sparkles },
+    { id: 'sport', label: '\u8fd0\u52a8', icon: Activity },
+  ]
+
+  const studySubItems = [
     { id: 'focus', label: '\u4e13\u6ce8', icon: Clock3 },
     { id: 'plans', label: '\u8ba1\u5212', icon: BookOpenText },
     { id: 'settings', label: '\u8bbe\u7f6e', icon: Settings },
@@ -414,10 +421,39 @@ function App() {
       <div className="relative flex h-[100svh] w-full flex-col overflow-hidden bg-[#F0F2F5] sm:h-[96svh] sm:w-auto sm:max-h-[900px] sm:aspect-[9/19.5] sm:rounded-[2rem] sm:border sm:border-white/70 sm:shadow-2xl">
         <header className="sticky top-0 z-20 rounded-b-3xl bg-gradient-to-r from-[#008069] to-[#0a8f75] px-5 py-5 text-white shadow-lg">
           <h1 className="text-xl font-bold tracking-wide">STUDYFLOW</h1>
+          {activeMainTab === 'study' && (
+            <div className="mt-3 flex gap-1">
+              {studySubItems.map((item) => {
+                const isActive = activeTab === item.id
+                const Icon = item.icon
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() =>
+                      withFeedback(() => {
+                        setActiveTab(item.id)
+                        if (item.id === 'settings') {
+                          void refreshExactAlarmStatus()
+                          void refreshNotificationStatus()
+                        }
+                      })
+                    }
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-1.5 text-xs font-medium transition active:bg-white/20 ${
+                      isActive ? 'bg-white/25 text-white' : 'text-white/70'
+                    }`}
+                  >
+                    <Icon size={14} />
+                    <span>{item.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </header>
 
         <main className="relative min-h-0 flex-1 overflow-y-auto px-4 py-5 pb-32">
-          {activeTab === 'focus' && (
+          {activeTab === 'focus' && activeMainTab === 'study' && (
             <section className="animate-fade-in flex min-h-full flex-col items-center justify-center gap-7">
               {needsPermissionGuide && (
                 <div className="w-full rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left">
@@ -429,6 +465,7 @@ function App() {
                     type="button"
                     onClick={() =>
                       withFeedback(() => {
+                        setActiveMainTab('study')
                         setActiveTab('settings')
                         void refreshExactAlarmStatus()
                         void refreshNotificationStatus()
@@ -514,7 +551,7 @@ function App() {
             </section>
           )}
 
-          {activeTab === 'plans' && (
+          {activeTab === 'plans' && activeMainTab === 'study' && (
             <section className="animate-fade-in flex min-h-full flex-col gap-3">
               <div className="rounded-3xl border border-white/60 bg-white/90 p-4 shadow-xl backdrop-blur">
                 <div className="mb-3 flex items-center justify-between">
@@ -604,7 +641,7 @@ function App() {
             </section>
           )}
 
-          {activeTab === 'settings' && (
+          {activeTab === 'settings' && activeMainTab === 'study' && (
             <section className="animate-fade-in space-y-3">
               <div className="rounded-3xl border border-white/60 bg-white/90 p-4 shadow-xl backdrop-blur">
                 <h2 className="text-sm font-semibold text-slate-800">{'\u8bbe\u7f6e'}</h2>
@@ -781,23 +818,40 @@ function App() {
               </div>
             </section>
           )}
+          {activeMainTab === 'interest' && (
+            <section className="animate-fade-in flex min-h-full flex-col items-center justify-center gap-4">
+              <div className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl backdrop-blur text-center">
+                <Sparkles size={40} className="mx-auto text-[#008069] mb-3" />
+                <p className="text-base font-semibold text-slate-700">{'\u5174\u8da3'}</p>
+                <p className="mt-2 text-sm text-slate-500">{'\u5373\u5c06\u63a8\u51fa\uff0c\u656c\u8bf7\u671f\u5f85'}</p>
+              </div>
+            </section>
+          )}
+
+          {activeMainTab === 'sport' && (
+            <section className="animate-fade-in flex min-h-full flex-col items-center justify-center gap-4">
+              <div className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl backdrop-blur text-center">
+                <Activity size={40} className="mx-auto text-[#008069] mb-3" />
+                <p className="text-base font-semibold text-slate-700">{'\u8fd0\u52a8'}</p>
+                <p className="mt-2 text-sm text-slate-500">{'\u5373\u5c06\u63a8\u51fa\uff0c\u656c\u8bf7\u671f\u5f85'}</p>
+              </div>
+            </section>
+          )}
         </main>
 
         <nav className="absolute bottom-3 left-2 right-2 z-20 flex rounded-2xl border border-white/70 bg-white/90 p-1 shadow-xl backdrop-blur">
-          {navItems.map((item) => {
-            const isActive = activeTab === item.id
+          {mainNavItems.map((item) => {
+            const isActive = activeMainTab === item.id
             const Icon = item.icon
-
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() =>
                   withFeedback(() => {
-                    setActiveTab(item.id)
-                    if (item.id === 'settings') {
-                      void refreshExactAlarmStatus()
-                      void refreshNotificationStatus()
+                    setActiveMainTab(item.id)
+                    if (item.id === 'study') {
+                      setActiveTab('focus')
                     }
                   })
                 }
