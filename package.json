@@ -23,8 +23,12 @@
   "author": "ZhuanZ1",
   "dependencies": {
     "@capacitor/android": "^8.1.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/app-launcher": "^8.0.1",
     "@capacitor/cli": "^8.1.0",
     "@capacitor/core": "^8.1.0",
+    "@capacitor/haptics": "^8.0.0",
+    "@capacitor/local-notifications": "^8.0.1",
     "@tailwindcss/vite": "^4.2.0",
     "lucide-react": "^0.575.0",
     "react": "^19.2.0",
