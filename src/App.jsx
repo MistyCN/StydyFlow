@@ -143,6 +143,7 @@ function App() {
   const [notificationEnabled, setNotificationEnabled] = useState(true)
   const [pendingCount, setPendingCount] = useState(0)
   const [notificationError, setNotificationError] = useState('')
+  const [timerEndAt, setTimerEndAt] = useState(null)
   const needsPermissionGuide = !notificationEnabled || (settings.developerMode && !exactAlarmGranted)
 
   const focusDurationSeconds = settings.shortTimerEnabled
@@ -314,28 +315,41 @@ function App() {
   }
 
   useEffect(() => {
-    if (!isRunning) {
+    if (!isRunning || timerEndAt === null) {
       return undefined
     }
 
-    const timerId = window.setInterval(() => {
-      setRemainingSeconds((previous) => {
-        if (previous <= 1) {
-          setIsRunning(false)
-          setShowFinishModal(true)
-          if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-            void LocalNotifications.cancel({
-              notifications: [{ id: TIMER_NOTIFICATION_ID }],
-            }).catch(() => {})
-          }
-          return focusDurationSeconds
+    const tick = () => {
+      const nextRemaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000))
+      if (nextRemaining <= 0) {
+        setIsRunning(false)
+        setTimerEndAt(null)
+        setShowFinishModal(true)
+        setRemainingSeconds(focusDurationSeconds)
+        if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+          void LocalNotifications.cancel({
+            notifications: [{ id: TIMER_NOTIFICATION_ID }],
+          }).catch(() => {})
         }
-        return previous - 1
-      })
-    }, 1000)
+        return
+      }
+      setRemainingSeconds(nextRemaining)
+    }
 
-    return () => window.clearInterval(timerId)
-  }, [focusDurationSeconds, isRunning])
+    tick()
+    const timerId = window.setInterval(tick, 1000)
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', tick)
+    }
+
+    return () => {
+      window.clearInterval(timerId)
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', tick)
+      }
+    }
+  }, [isRunning, timerEndAt, focusDurationSeconds])
 
   useEffect(() => {
     localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(plans))
@@ -464,6 +478,7 @@ function App() {
                     onClick={() =>
                       withFeedback(() => {
                         setIsRunning(false)
+                        setTimerEndAt(null)
                         setRemainingSeconds(focusDurationSeconds)
                         void cancelTimerNotification()
                       })
@@ -481,10 +496,12 @@ function App() {
                   withFeedback(() => {
                     if (isRunning) {
                       setIsRunning(false)
+                      setTimerEndAt(null)
                       void cancelTimerNotification()
                       return
                     }
 
+                    setTimerEndAt(Date.now() + remainingSeconds * 1000)
                     setIsRunning(true)
                     void scheduleTimerNotification(remainingSeconds)
                   })
