@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tail:*)",
+      "Bash(npx cap sync:*)",
+      "Bash(npx cap:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(start \"\" \"C:/Program Files/Android/Android Studio/bin/studio64.exe\")",
+      "Bash(start \"\" \"C:/Users/ZhuanZ1/AppData/Local/Programs/Android Studio/bin/studio64.exe\")",
+      "Bash(cmd /c \"start studio64\")",
+      "Bash(npm run build:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(\"C:/Users/ZhuanZ1/Desktop/StydyFlow/src/constants.js\":*)",
+      "Bash(\"C:/Users/ZhuanZ1/Desktop/StydyFlow/src/pages/FocusPage.jsx\":*)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}

@@ -1,136 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
-import { registerPlugin } from '@capacitor/core'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { LocalNotifications } from '@capacitor/local-notifications'
-import { Activity, BookOpenText, Check, Clock3, Plus, Settings, Sparkles, Trash2 } from 'lucide-react'
+import { Activity, BookOpenText, CalendarDays, Clock3, Settings, Sparkles } from 'lucide-react'
 
-const PLAN_STORAGE_KEY = 'studyflow-plans'
-const LEGACY_MEMO_STORAGE_KEY = 'studyflow-memos'
-const SETTINGS_STORAGE_KEY = 'studyflow-settings'
-const FOCUS_DURATION_SECONDS = 25 * 60
-const DEBUG_FOCUS_DURATION_SECONDS = 5
-const TIMER_NOTIFICATION_ID = 1001
-const TIMER_CHANNEL_ID = 'studyflow-alerts'
-const SettingsBridge = registerPlugin('SettingsBridge')
-
-function loadSettings() {
-  const defaults = {
-    vibrationEnabled: true,
-    developerMode: false,
-    shortTimerEnabled: false,
-  }
-
-  try {
-    const rawSettings = localStorage.getItem(SETTINGS_STORAGE_KEY)
-    if (!rawSettings) {
-      return defaults
-    }
-
-    const parsed = JSON.parse(rawSettings)
-    const legacyDebugMode = typeof parsed.debugMode === 'boolean' ? parsed.debugMode : null
-    return {
-      vibrationEnabled:
-        typeof parsed.vibrationEnabled === 'boolean'
-          ? parsed.vibrationEnabled
-          : defaults.vibrationEnabled,
-      developerMode:
-        typeof parsed.developerMode === 'boolean'
-          ? parsed.developerMode
-          : legacyDebugMode ?? defaults.developerMode,
-      shortTimerEnabled:
-        typeof parsed.shortTimerEnabled === 'boolean'
-          ? parsed.shortTimerEnabled
-          : legacyDebugMode ?? defaults.shortTimerEnabled,
-    }
-  } catch {
-    return defaults
-  }
-}
-
-function formatTime(totalSeconds) {
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-}
-
-function normalizePlan(item) {
-  if (!item || typeof item !== 'object') {
-    return null
-  }
-
-  if (typeof item.title === 'string') {
-    return {
-      id: typeof item.id === 'string' ? item.id : crypto.randomUUID(),
-      title: item.title,
-      completed: Boolean(item.completed),
-      updatedAt: typeof item.updatedAt === 'number' ? item.updatedAt : Date.now(),
-    }
-  }
-
-  if (typeof item.content === 'string') {
-    return {
-      id: typeof item.id === 'string' ? item.id : crypto.randomUUID(),
-      title: item.content,
-      completed: false,
-      updatedAt: typeof item.updatedAt === 'number' ? item.updatedAt : Date.now(),
-    }
-  }
-
-  if (typeof item.text === 'string') {
-    return {
-      id: typeof item.id === 'string' ? item.id : crypto.randomUUID(),
-      title: item.text,
-      completed: false,
-      updatedAt: Date.now(),
-    }
-  }
-
-  return null
-}
-
-function loadPlans() {
-  try {
-    const rawPlans = localStorage.getItem(PLAN_STORAGE_KEY)
-    if (rawPlans) {
-      const parsed = JSON.parse(rawPlans)
-      if (Array.isArray(parsed)) {
-        return parsed.map(normalizePlan).filter(Boolean)
-      }
-    }
-
-    const legacyRaw = localStorage.getItem(LEGACY_MEMO_STORAGE_KEY)
-    if (!legacyRaw) {
-      return []
-    }
-
-    const legacyParsed = JSON.parse(legacyRaw)
-    if (!Array.isArray(legacyParsed)) {
-      return []
-    }
-
-    return legacyParsed.map(normalizePlan).filter(Boolean)
-  } catch {
-    return []
-  }
-}
-
-function createPlan(title) {
-  return {
-    id: crypto.randomUUID(),
-    title,
-    completed: false,
-    updatedAt: Date.now(),
-  }
-}
-
-function formatPlanTime(timestamp) {
-  return new Date(timestamp).toLocaleString([], {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+import {
+  FOCUS_DURATION_SECONDS,
+  DEBUG_FOCUS_DURATION_SECONDS,
+  TIMER_NOTIFICATION_ID,
+  TIMER_CHANNEL_ID,
+  SETTINGS_STORAGE_KEY,
+  PLAN_STORAGE_KEY,
+  SettingsBridge,
+} from './constants'
+import { loadSettings, loadPlans, createPlan } from './utils'
+import FocusPage from './pages/FocusPage'
+import PlansPage from './pages/PlansPage'
+import SettingsPage from './pages/SettingsPage'
+import CountdownPage from './pages/CountdownPage'
+import InterestPage from './pages/InterestPage'
+import SportPage from './pages/SportPage'
 
 function App() {
   const [activeMainTab, setActiveMainTab] = useState('study')
@@ -275,7 +163,6 @@ function App() {
             channelId: TIMER_CHANNEL_ID,
             schedule: {
               at: new Date(Date.now() + seconds * 1000),
-              // Avoid Android's idle throttling during short debug tests.
               allowWhileIdle: false,
             },
           },
@@ -283,7 +170,6 @@ function App() {
       })
       await refreshNotificationStatus()
     } catch (error) {
-      // Keep this visible for device debugging.
       console.error('Failed to schedule local notification', error)
       setNotificationError(String(error))
     }
@@ -405,12 +291,13 @@ function App() {
     { id: 'study', label: '\u5b66\u4e60', icon: BookOpenText },
     { id: 'interest', label: '\u5174\u8da3', icon: Sparkles },
     { id: 'sport', label: '\u8fd0\u52a8', icon: Activity },
+    { id: 'settings', label: '\u8bbe\u7f6e', icon: Settings },
   ]
 
   const studySubItems = [
     { id: 'focus', label: '\u4e13\u6ce8', icon: Clock3 },
     { id: 'plans', label: '\u8ba1\u5212', icon: BookOpenText },
-    { id: 'settings', label: '\u8bbe\u7f6e', icon: Settings },
+    { id: 'countdown', label: '\u5012\u8ba1\u65e5', icon: CalendarDays },
   ]
 
   return (
@@ -419,10 +306,10 @@ function App() {
       <div className="pointer-events-none absolute -right-20 top-1/3 h-56 w-56 rounded-full bg-[#008069]/15 blur-3xl" />
 
       <div className="relative flex h-[100svh] w-full flex-col overflow-hidden bg-[#F0F2F5] sm:h-[96svh] sm:w-auto sm:max-h-[900px] sm:aspect-[9/19.5] sm:rounded-[2rem] sm:border sm:border-white/70 sm:shadow-2xl">
-        <header className="sticky top-0 z-20 rounded-b-3xl bg-gradient-to-r from-[#008069] to-[#0a8f75] px-5 py-5 text-white shadow-lg">
+        <header className="sticky top-0 z-20 bg-gradient-to-r from-[#008069] to-[#0a8f75] px-5 py-5 text-white shadow-lg">
           <h1 className="text-xl font-bold tracking-wide">STUDYFLOW</h1>
           {activeMainTab === 'study' && (
-            <div className="mt-3 flex gap-1">
+            <div className="mt-3 flex gap-1 rounded-2xl bg-black/20 p-1">
               {studySubItems.map((item) => {
                 const isActive = activeTab === item.id
                 const Icon = item.icon
@@ -433,14 +320,10 @@ function App() {
                     onClick={() =>
                       withFeedback(() => {
                         setActiveTab(item.id)
-                        if (item.id === 'settings') {
-                          void refreshExactAlarmStatus()
-                          void refreshNotificationStatus()
-                        }
                       })
                     }
                     className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-1.5 text-xs font-medium transition active:bg-white/20 ${
-                      isActive ? 'bg-white/25 text-white' : 'text-white/70'
+                      isActive ? 'bg-white text-[#008069] shadow' : 'text-white/80'
                     }`}
                   >
                     <Icon size={14} />
@@ -454,388 +337,67 @@ function App() {
 
         <main className="relative min-h-0 flex-1 overflow-y-auto px-4 py-5 pb-32">
           {activeTab === 'focus' && activeMainTab === 'study' && (
-            <section className="animate-fade-in flex min-h-full flex-col items-center justify-center gap-7">
-              {needsPermissionGuide && (
-                <div className="w-full rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left">
-                  <p className="text-sm font-semibold text-amber-800">{'\u9700\u8981\u5f00\u542f\u901a\u77e5\u6743\u9650'}</p>
-                  <p className="mt-1 text-xs text-amber-700">
-                    {'\u8bf7\u53bb\u8bbe\u7f6e\u9875\u5f00\u542f\u901a\u77e5\u901a\u9053\u4e0e\u5f39\u7a97/\u61ac\u6d6e\uff0c\u5426\u5219\u9000\u5230\u540e\u53f0\u53ef\u80fd\u4e0d\u5f39\u7a97\u3002'}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      withFeedback(() => {
-                        setActiveMainTab('study')
-                        setActiveTab('settings')
-                        void refreshExactAlarmStatus()
-                        void refreshNotificationStatus()
-                      })
-                    }
-                    className="mt-2 rounded-xl border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 transition active:bg-amber-100"
-                  >
-                    {'\u524d\u5f80\u8bbe\u7f6e\u9875'}
-                  </button>
-                </div>
-              )}
-
-              <div className="w-full rounded-3xl border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur">
-                <div className="mx-auto w-fit">
-                  <div className="relative">
-                    <svg className="h-64 w-64 -rotate-90" viewBox="0 0 240 240">
-                      <circle
-                        cx="120"
-                        cy="120"
-                        r="110"
-                        fill="none"
-                        stroke="#E2E8F0"
-                        strokeWidth="12"
-                      />
-                      <circle
-                        cx="120"
-                        cy="120"
-                        r="110"
-                        fill="none"
-                        stroke="#008069"
-                        strokeWidth="12"
-                        strokeLinecap="round"
-                        strokeDasharray={circleCircumference}
-                        strokeDashoffset={strokeOffset}
-                        className="transition-all duration-500"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center text-5xl font-semibold text-slate-800">
-                      {formatTime(remainingSeconds)}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      withFeedback(() => {
-                        setIsRunning(false)
-                        setTimerEndAt(null)
-                        setRemainingSeconds(focusDurationSeconds)
-                        void cancelTimerNotification()
-                      })
-                    }
-                    className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-600 shadow-sm transition active:bg-slate-200"
-                  >
-                    {'\u91cd\u7f6e'}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  withFeedback(() => {
-                    if (isRunning) {
-                      setIsRunning(false)
-                      setTimerEndAt(null)
-                      void cancelTimerNotification()
-                      return
-                    }
-
-                    setTimerEndAt(Date.now() + remainingSeconds * 1000)
-                    setIsRunning(true)
-                    void scheduleTimerNotification(remainingSeconds)
-                  })
-                }
-                className="absolute bottom-35 right-5 rounded-2xl bg-[#008069] p-5 text-white shadow-xl transition active:bg-[#25D366]"
-                aria-label={isRunning ? 'Pause timer' : 'Start timer'}
-              >
-                <Clock3 size={24} />
-              </button>
-            </section>
+            <FocusPage
+              needsPermissionGuide={needsPermissionGuide}
+              withFeedback={withFeedback}
+              setActiveMainTab={setActiveMainTab}
+              refreshExactAlarmStatus={refreshExactAlarmStatus}
+              refreshNotificationStatus={refreshNotificationStatus}
+              circleCircumference={circleCircumference}
+              strokeOffset={strokeOffset}
+              remainingSeconds={remainingSeconds}
+              focusDurationSeconds={focusDurationSeconds}
+              cancelTimerNotification={cancelTimerNotification}
+              setIsRunning={setIsRunning}
+              setTimerEndAt={setTimerEndAt}
+              setRemainingSeconds={setRemainingSeconds}
+              isRunning={isRunning}
+              scheduleTimerNotification={scheduleTimerNotification}
+            />
           )}
 
           {activeTab === 'plans' && activeMainTab === 'study' && (
-            <section className="animate-fade-in flex min-h-full flex-col gap-3">
-              <div className="rounded-3xl border border-white/60 bg-white/90 p-4 shadow-xl backdrop-blur">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-700">{'\u4eca\u65e5\u8fdb\u5ea6'}</p>
-                  <span className="rounded-full bg-[#25D366]/20 px-3 py-1 text-xs font-semibold text-[#006a57]">
-                    {doneCount}/{plans.length}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={planDraft}
-                    onChange={(event) => setPlanDraft(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        event.preventDefault()
-                        addPlan()
-                      }
-                    }}
-                    className="h-11 flex-1 rounded-2xl border border-slate-200 bg-[#F7F8FA] px-4 text-sm text-slate-800 outline-none"
-                    placeholder={'\u6dfb\u52a0\u65b0\u8ba1\u5212'}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => withFeedback(addPlan)}
-                    className="rounded-2xl bg-[#008069] p-3 text-white shadow-md transition active:bg-[#25D366]"
-                    aria-label="Add plan"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2 pb-2">
-                {plans.length === 0 && (
-                  <div className="rounded-2xl border border-white/60 bg-white/90 p-4 text-sm text-slate-500 shadow-lg">
-                    {'\u6682\u65e0\u8ba1\u5212\uff0c\u4ece\u4e0a\u9762\u6dfb\u52a0\u4e00\u6761\u4efb\u52a1\u3002'}
-                  </div>
-                )}
-
-                {plans.map((plan, index) => (
-                  <article
-                    key={plan.id}
-                    className="animate-slide-up rounded-2xl border border-white/70 bg-white/95 p-3 shadow-md transition duration-200 hover:-translate-y-0.5"
-                    style={{ animationDelay: `${index * 60}ms` }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <button
-                        type="button"
-                        onClick={() => withFeedback(() => togglePlan(plan.id))}
-                        className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2 transition active:bg-slate-200 ${
-                          plan.completed
-                            ? 'border-[#008069] bg-[#008069] text-white'
-                            : 'border-slate-300 bg-white text-transparent'
-                        }`}
-                        aria-label="Toggle plan"
-                      >
-                        <Check size={13} />
-                      </button>
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className={`break-words text-sm ${
-                            plan.completed
-                              ? 'text-slate-400 line-through'
-                              : 'text-slate-800'
-                          }`}
-                        >
-                          {plan.title}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {'\u66f4\u65b0\u4e8e '}
-                          {formatPlanTime(plan.updatedAt)}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => withFeedback(() => deletePlan(plan.id))}
-                        className="rounded-xl p-2 text-slate-500 transition active:bg-slate-200"
-                        aria-label="Delete plan"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
+            <PlansPage
+              plans={plans}
+              doneCount={doneCount}
+              planDraft={planDraft}
+              setPlanDraft={setPlanDraft}
+              addPlan={addPlan}
+              togglePlan={togglePlan}
+              deletePlan={deletePlan}
+              withFeedback={withFeedback}
+            />
           )}
 
-          {activeTab === 'settings' && activeMainTab === 'study' && (
-            <section className="animate-fade-in space-y-3">
-              <div className="rounded-3xl border border-white/60 bg-white/90 p-4 shadow-xl backdrop-blur">
-                <h2 className="text-sm font-semibold text-slate-800">{'\u8bbe\u7f6e'}</h2>
-                <div className="mt-3 space-y-3 text-left">
-                  <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                    <div>
-                      <p className="text-sm font-medium text-slate-800">{'\u6309\u952e\u9707\u52a8\u53cd\u9988'}</p>
-                      <p className="text-xs text-slate-500">{'\u70b9\u51fb\u6309\u94ae\u65f6\u89e6\u53d1\u8f7b\u5fae\u9707\u52a8'}</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={settings.vibrationEnabled}
-                      onChange={(event) => {
-                        setSettings((previous) => ({
-                          ...previous,
-                          vibrationEnabled: event.target.checked,
-                        }))
-                      }}
-                      className="h-5 w-5 accent-[#008069]"
-                    />
-                  </label>
-
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                    <p className="text-sm font-medium text-slate-800">{'\u540e\u53f0\u5230\u70b9\u901a\u77e5'}</p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {notificationEnabled
-                        ? '\u8bf7\u786e\u4fdd StudyFlow Alerts \u901a\u9053\u5df2\u5f00\u542f\u5f39\u7a97/\u61ac\u6d6e/\u6a2a\u5e45'
-                        : '\u7cfb\u7edf\u4e2d\u6b64 App \u901a\u77e5\u603b\u5f00\u5173\u5df2\u5173\u95ed\uff0c\u8bf7\u5148\u5f00\u542f'}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        withFeedback(() => {
-                          void openSystemNotificationSettings()
-                        })
-                      }}
-                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition active:bg-slate-200"
-                    >
-                      {'\u6253\u5f00StudyFlow Alerts\u901a\u9053\u8bbe\u7f6e'}
-                    </button>
-
-                    {notificationError && (
-                      <p className="mt-2 text-xs text-red-600">{`\u9519\u8bef: ${notificationError}`}</p>
-                    )}
-
-                    <div className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-3">
-                      <p className="text-xs font-semibold text-slate-700">{'\u6388\u6743\u6307\u5f15\uff08\u7b80\u5316\uff09'}</p>
-                      <p className="mt-2 text-xs text-slate-600">
-                        {`1. \u70b9\u300c\u6253\u5f00StudyFlow Alerts\u901a\u9053\u8bbe\u7f6e\u300d -> \u6253\u5f00\u300c\u5f39\u7a97/\u61ac\u6d6e/\u6a2a\u5e45\u300d`}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-600">{`2. \u901a\u77e5\u603b\u5f00\u5173\u672a\u5f00\u65f6\uff0c\u8bf7\u5148\u5728\u7cfb\u7edf\u5c42\u6253\u5f00 App \u901a\u77e5`}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-white/60 bg-white/90 p-4 shadow-xl backdrop-blur">
-                <h2 className="text-sm font-semibold text-slate-800">{'\u5f00\u53d1\u8005\u6a21\u5f0f'}</h2>
-                <div className="mt-3 space-y-3 text-left">
-                  <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                    <div>
-                      <p className="text-sm font-medium text-slate-800">
-                        {'\u5f00\u542f\u5f00\u53d1\u8005\u529f\u80fd'}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {'\u663e\u793a\u300c\u53d1\u9001\u6d4b\u8bd5\u901a\u77e5/\u5f00\u542f\u7cbe\u786e\u63d0\u9192\u300d\u7b49\u9ad8\u7ea7\u64cd\u4f5c'}
-                      </p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={settings.developerMode}
-                      onChange={(event) => {
-                        const enabled = event.target.checked
-                        withFeedback(() => {
-                          setIsRunning(false)
-                          void cancelTimerNotification()
-                          setRemainingSeconds(FOCUS_DURATION_SECONDS)
-                          setSettings((previous) => ({
-                            ...previous,
-                            developerMode: enabled,
-                            shortTimerEnabled: enabled ? previous.shortTimerEnabled : false,
-                          }))
-                        })
-                      }}
-                      className="h-5 w-5 accent-[#008069]"
-                    />
-                  </label>
-
-                  {settings.developerMode && (
-                    <>
-                      <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                        <div>
-                          <p className="text-sm font-medium text-slate-800">
-                            {'5\u79d2\u5012\u8ba1\u65f6\uff08\u53ef\u9009\uff09'}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {'\u5f00\u542f\u540e\u4e13\u6ce8\u5012\u8ba1\u65f6\u4e3a 00:05\uff0c\u7528\u4e8e\u5feb\u901f\u9a8c\u8bc1'}
-                          </p>
-                        </div>
-                        <input
-                          type="checkbox"
-                          checked={settings.shortTimerEnabled}
-                          onChange={(event) => {
-                            const enabled = event.target.checked
-                            withFeedback(() => {
-                              setIsRunning(false)
-                              void cancelTimerNotification()
-                              setRemainingSeconds(
-                                enabled ? DEBUG_FOCUS_DURATION_SECONDS : FOCUS_DURATION_SECONDS,
-                              )
-                              setSettings((previous) => ({
-                                ...previous,
-                                shortTimerEnabled: enabled,
-                              }))
-                            })
-                          }}
-                          className="h-5 w-5 accent-[#008069]"
-                        />
-                      </label>
-
-                      <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                        <p className="text-sm font-medium text-slate-800">{'\u5f00\u53d1\u8005\u8c03\u8bd5'}</p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {exactAlarmGranted
-                            ? '\u7cbe\u786e\u63d0\u9192\u5df2\u5f00\u542f'
-                            : '\u7cbe\u786e\u63d0\u9192\u672a\u5f00\u542f\uff0c\u77ed\u65f6\u901a\u77e5\u53ef\u80fd\u5ef6\u8fdf\u6216\u5931\u6548'}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {`\u5f53\u524d\u5f85\u89e6\u53d1\u901a\u77e5: ${pendingCount}`}
-                        </p>
-                        <div className="mt-2 grid grid-cols-2 gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              withFeedback(() => {
-                                void scheduleTimerNotification(3)
-                              })
-                            }}
-                            className="rounded-xl bg-[#008069] px-3 py-2 text-xs font-medium text-white transition active:bg-[#25D366]"
-                          >
-                            {'\u53d1\u90013\u79d2\u6d4b\u8bd5\u901a\u77e5'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              withFeedback(() => {
-                                void LocalNotifications.changeExactNotificationSetting().finally(() => {
-                                  void refreshExactAlarmStatus()
-                                  void refreshNotificationStatus()
-                                })
-                              })
-                            }}
-                            className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition active:bg-slate-200"
-                          >
-                            {'\u5f00\u542f\u7cbe\u786e\u63d0\u9192'}
-                          </button>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            withFeedback(() => {
-                              void refreshNotificationStatus()
-                              void refreshExactAlarmStatus()
-                            })
-                          }}
-                          className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition active:bg-slate-200"
-                        >
-                          {'\u5237\u65b0\u8c03\u8bd5\u72b6\u6001'}
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </section>
+          {activeTab === 'countdown' && activeMainTab === 'study' && (
+            <CountdownPage withFeedback={withFeedback} />
           )}
+
+          {activeMainTab === 'settings' && (
+            <SettingsPage
+              settings={settings}
+              setSettings={setSettings}
+              notificationEnabled={notificationEnabled}
+              notificationError={notificationError}
+              exactAlarmGranted={exactAlarmGranted}
+              pendingCount={pendingCount}
+              withFeedback={withFeedback}
+              openSystemNotificationSettings={openSystemNotificationSettings}
+              scheduleTimerNotification={scheduleTimerNotification}
+              refreshNotificationStatus={refreshNotificationStatus}
+              refreshExactAlarmStatus={refreshExactAlarmStatus}
+              setIsRunning={setIsRunning}
+              cancelTimerNotification={cancelTimerNotification}
+              setRemainingSeconds={setRemainingSeconds}
+            />
+          )}
+
           {activeMainTab === 'interest' && (
-            <section className="animate-fade-in flex min-h-full flex-col items-center justify-center gap-4">
-              <div className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl backdrop-blur text-center">
-                <Sparkles size={40} className="mx-auto text-[#008069] mb-3" />
-                <p className="text-base font-semibold text-slate-700">{'\u5174\u8da3'}</p>
-                <p className="mt-2 text-sm text-slate-500">{'\u5373\u5c06\u63a8\u51fa\uff0c\u656c\u8bf7\u671f\u5f85'}</p>
-              </div>
-            </section>
+            <InterestPage />
           )}
 
           {activeMainTab === 'sport' && (
-            <section className="animate-fade-in flex min-h-full flex-col items-center justify-center gap-4">
-              <div className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl backdrop-blur text-center">
-                <Activity size={40} className="mx-auto text-[#008069] mb-3" />
-                <p className="text-base font-semibold text-slate-700">{'\u8fd0\u52a8'}</p>
-                <p className="mt-2 text-sm text-slate-500">{'\u5373\u5c06\u63a8\u51fa\uff0c\u656c\u8bf7\u671f\u5f85'}</p>
-              </div>
-            </section>
+            <SportPage withFeedback={withFeedback} />
           )}
         </main>
 
@@ -852,6 +414,10 @@ function App() {
                     setActiveMainTab(item.id)
                     if (item.id === 'study') {
                       setActiveTab('focus')
+                    }
+                    if (item.id === 'settings') {
+                      void refreshExactAlarmStatus()
+                      void refreshNotificationStatus()
                     }
                   })
                 }
