@@ -100,7 +100,7 @@ function App() {
           setNotificationError('')
         } catch (finalError) {
           setNotificationError(
-            `\u6253\u5f00\u901a\u77e5\u8bbe\u7f6e\u5931\u8d25\uff0c\u8bf7\u624b\u52a8\u8fdb\u5165\u7cfb\u7edf\u8bbe\u7f6e -> \u5e94\u7528 -> StudyFlow\u3002\u9519\u8bef: ${String(
+            `打开通知设置失败，请手动进入系统设置 -> 应用 -> StudyFlow。错误: ${String(
               finalError ?? fallbackError,
             )}`,
           )
@@ -158,8 +158,8 @@ function App() {
         notifications: [
           {
             id: TIMER_NOTIFICATION_ID,
-            title: '\u5012\u8ba1\u65f6\u7ed3\u675f',
-            body: '\u4e13\u6ce8\u65f6\u95f4\u5df2\u5b8c\u6210\uff0c\u53ef\u4ee5\u4f11\u606f\u4e00\u4e0b\u3002',
+            title: '倒计时结束',
+            body: '专注时间已完成，可以休息一下。',
             channelId: TIMER_CHANNEL_ID,
             schedule: {
               at: new Date(Date.now() + seconds * 1000),
@@ -216,7 +216,7 @@ function App() {
         if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
           void LocalNotifications.cancel({
             notifications: [{ id: TIMER_NOTIFICATION_ID }],
-          }).catch(() => {})
+          }).catch(() => { })
         }
         return
       }
@@ -256,7 +256,10 @@ function App() {
     [plans],
   )
 
-  const circleCircumference = 2 * Math.PI * 110
+  // Focus Circle Params
+  const strokeWidth = 14
+  const radius = 110
+  const circleCircumference = 2 * Math.PI * radius
   const strokeOffset = circleCircumference * (1 - progress)
 
   const addPlan = () => {
@@ -274,10 +277,10 @@ function App() {
       previous.map((plan) =>
         plan.id === id
           ? {
-              ...plan,
-              completed: !plan.completed,
-              updatedAt: Date.now(),
-            }
+            ...plan,
+            completed: !plan.completed,
+            updatedAt: Date.now(),
+          }
           : plan,
       ),
     )
@@ -288,31 +291,41 @@ function App() {
   }
 
   const mainNavItems = [
-    { id: 'study', label: '\u5b66\u4e60', icon: BookOpenText },
-    { id: 'interest', label: '\u5174\u8da3', icon: Sparkles },
-    { id: 'sport', label: '\u8fd0\u52a8', icon: Activity },
-    { id: 'settings', label: '\u8bbe\u7f6e', icon: Settings },
+    { id: 'study', label: '学习', icon: BookOpenText },
+    { id: 'interest', label: '兴趣', icon: Sparkles },
+    { id: 'sport', label: '运动', icon: Activity },
+    { id: 'settings', label: '设置', icon: Settings },
   ]
 
   const studySubItems = [
-    { id: 'focus', label: '\u4e13\u6ce8', icon: Clock3 },
-    { id: 'plans', label: '\u8ba1\u5212', icon: BookOpenText },
-    { id: 'countdown', label: '\u5012\u8ba1\u65e5', icon: CalendarDays },
+    { id: 'focus', label: '专注' },
+    { id: 'plans', label: '计划' },
+    { id: 'countdown', label: '倒计日' },
   ]
 
-  return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#F0F2F5] p-0 text-slate-800 sm:p-3">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#25D366]/20 blur-3xl" />
-      <div className="pointer-events-none absolute -right-20 top-1/3 h-56 w-56 rounded-full bg-[#008069]/15 blur-3xl" />
+  const getPageTitle = () => {
+    if (activeMainTab === 'interest') return '兴趣'
+    if (activeMainTab === 'sport') return '运动'
+    if (activeMainTab === 'settings') return '设置'
+    return '学习探索'
+  }
 
-      <div className="relative flex h-[100svh] w-full flex-col overflow-hidden bg-[#F0F2F5] sm:h-[96svh] sm:w-auto sm:max-h-[900px] sm:aspect-[9/19.5] sm:rounded-[2rem] sm:border sm:border-white/70 sm:shadow-2xl">
-        <header className="sticky top-0 z-20 bg-gradient-to-r from-[#008069] to-[#0a8f75] px-5 py-5 text-white shadow-lg">
-          <h1 className="text-xl font-bold tracking-wide">STUDYFLOW</h1>
+  return (
+    <div className="relative flex min-h-screen items-center justify-center p-0 text-[#1c1c1e] sm:p-3 overflow-hidden">
+      <div className="relative flex h-[100svh] w-full flex-col overflow-hidden sm:h-[96svh] sm:w-auto sm:max-h-[900px] sm:aspect-[9/19.5] sm:rounded-[2.5rem] sm:border-[8px] sm:border-black sm:shadow-2xl bg-transparent">
+
+        {/* iOS Header */}
+        <header className="sticky top-0 z-20 glass-card rounded-none border-x-0 border-t-0 px-4 pt-4 pb-3 h-fit flex-none">
+          <div className="flex items-center justify-center mb-1 w-full relative h-[28px]">
+            <h1 className="text-[17px] font-semibold tracking-tight absolute inset-0 flex items-center justify-center pointer-events-none">
+              {getPageTitle()}
+            </h1>
+          </div>
+
           {activeMainTab === 'study' && (
-            <div className="mt-3 flex gap-1 rounded-2xl bg-black/20 p-1">
+            <div className="segmented-control mt-2 w-full max-w-[280px] mx-auto">
               {studySubItems.map((item) => {
                 const isActive = activeTab === item.id
-                const Icon = item.icon
                 return (
                   <button
                     key={item.id}
@@ -322,12 +335,9 @@ function App() {
                         setActiveTab(item.id)
                       })
                     }
-                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-1.5 text-xs font-medium transition active:bg-white/20 ${
-                      isActive ? 'bg-white text-[#008069] shadow' : 'text-white/80'
-                    }`}
+                    className={isActive ? 'active' : ''}
                   >
-                    <Icon size={14} />
-                    <span>{item.label}</span>
+                    {item.label}
                   </button>
                 )
               })}
@@ -335,7 +345,7 @@ function App() {
           )}
         </header>
 
-        <main className="relative min-h-0 flex-1 overflow-y-auto px-4 py-5 pb-32">
+        <main className="relative min-h-0 flex-1 overflow-y-auto px-4 py-6 pb-28">
           {activeTab === 'focus' && activeMainTab === 'study' && (
             <FocusPage
               needsPermissionGuide={needsPermissionGuide}
@@ -353,6 +363,8 @@ function App() {
               setRemainingSeconds={setRemainingSeconds}
               isRunning={isRunning}
               scheduleTimerNotification={scheduleTimerNotification}
+              radius={radius}
+              strokeWidth={strokeWidth}
             />
           )}
 
@@ -401,57 +413,66 @@ function App() {
           )}
         </main>
 
-        <nav className="absolute bottom-3 left-2 right-2 z-20 flex rounded-2xl border border-white/70 bg-white/90 p-1 shadow-xl backdrop-blur">
-          {mainNavItems.map((item) => {
-            const isActive = activeMainTab === item.id
-            const Icon = item.icon
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() =>
-                  withFeedback(() => {
-                    setActiveMainTab(item.id)
-                    if (item.id === 'study') {
-                      setActiveTab('focus')
-                    }
-                    if (item.id === 'settings') {
-                      void refreshExactAlarmStatus()
-                      void refreshNotificationStatus()
-                    }
-                  })
-                }
-                className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-xs transition active:bg-slate-200 ${
-                  isActive
-                    ? 'bg-[#25D366]/20 font-bold text-[#007a62]'
-                    : 'text-slate-500'
-                }`}
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </button>
-            )
-          })}
+        {/* iOS Tab Bar */}
+        <nav className="absolute bottom-0 left-0 right-0 z-20 flex bg-white/75 backdrop-blur-[30px] border-t border-[rgba(60,60,67,0.1)] pb-safe-bottom">
+          <div className="flex w-full items-start justify-between px-2 pt-2 pb-6">
+            {mainNavItems.map((item) => {
+              const isActive = activeMainTab === item.id
+              const Icon = item.icon
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() =>
+                    withFeedback(() => {
+                      setActiveMainTab(item.id)
+                      if (item.id === 'study') {
+                        setActiveTab('focus')
+                      }
+                      if (item.id === 'settings') {
+                        void refreshExactAlarmStatus()
+                        void refreshNotificationStatus()
+                      }
+                    })
+                  }
+                  className={`flex flex-1 flex-col items-center gap-[4px] pt-1 text-[10px] font-medium transition-colors ${isActive ? 'text-[#007aff]' : 'text-[#8e8e93]'
+                    }`}
+                >
+                  <Icon
+                    size={26}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    fill={isActive ? 'currentColor' : 'none'}
+                  />
+                  <span>{item.label}</span>
+                </button>
+              )
+            })}
+          </div>
         </nav>
 
+        {/* iOS Alert Modal */}
         {showFinishModal && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-900/50 px-4">
-            <div className="w-full max-w-xs rounded-3xl bg-white p-5 text-center shadow-2xl">
-              <h3 className="text-lg font-semibold text-slate-800">{'\u5012\u8ba1\u65f6\u7ed3\u675f'}</h3>
-              <p className="mt-2 text-sm text-slate-600">
-                {'\u4e13\u6ce8\u65f6\u95f4\u5df2\u5b8c\u6210\uff0c\u53ef\u4ee5\u4f11\u606f\u4e00\u4e0b\u3002'}
-              </p>
-              <button
-                type="button"
-                onClick={() =>
-                  withFeedback(() => {
-                    setShowFinishModal(false)
-                  })
-                }
-                className="mt-4 w-full rounded-2xl bg-[#008069] px-4 py-2.5 text-sm font-medium text-white transition active:bg-[#25D366]"
-              >
-                {'\u6211\u77e5\u9053\u4e86'}
-              </button>
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20 backdrop-blur-sm px-4 animate-fade-in">
+            <div className="w-[270px] rounded-[14px] bg-white/90 backdrop-blur-xl text-center shadow-2xl flex flex-col overflow-hidden animate-spring-in">
+              <div className="p-4 pt-5 pb-4">
+                <h3 className="text-[17px] font-semibold text-[#1c1c1e] tracking-tight">倒计时结束</h3>
+                <p className="mt-1 text-[13px] leading-tight text-[#1c1c1e]">
+                  专注时间已完成，可以休息一下。
+                </p>
+              </div>
+              <div className="border-t border-[rgba(60,60,67,0.18)]">
+                <button
+                  type="button"
+                  onClick={() =>
+                    withFeedback(() => {
+                      setShowFinishModal(false)
+                    })
+                  }
+                  className="w-full text-[#007aff] px-4 py-[11px] text-[17px] font-semibold active:bg-[rgba(60,60,67,0.1)] transition-colors"
+                >
+                  我知道了
+                </button>
+              </div>
             </div>
           </div>
         )}

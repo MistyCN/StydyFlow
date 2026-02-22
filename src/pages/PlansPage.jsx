@@ -12,15 +12,11 @@ export default function PlansPage({
   withFeedback,
 }) {
   return (
-    <section className="animate-fade-in flex min-h-full flex-col gap-3">
-      <div className="rounded-3xl border border-white/60 bg-white/90 p-4 shadow-xl backdrop-blur">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold text-slate-800">{'\u8ba1\u5212'}</span>
-          <span className="text-xs text-slate-500">
-            {doneCount}/{plans.length} {'\u5df2\u5b8c\u6210'}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
+    <section className="animate-fade-in flex min-h-full flex-col gap-5 pt-2">
+
+      {/* Search / Add Input */}
+      <div className="relative flex items-center gap-3">
+        <div className="relative flex-1">
           <input
             type="text"
             value={planDraft}
@@ -31,72 +27,84 @@ export default function PlansPage({
                 addPlan()
               }
             }}
-            className="h-11 flex-1 rounded-2xl border border-slate-200 bg-[#F7F8FA] px-4 text-sm text-slate-800 outline-none"
-            placeholder={'\u6dfb\u52a0\u65b0\u8ba1\u5212'}
+            className="w-full h-[36px] rounded-[10px] bg-[rgba(118,118,128,0.12)] pl-4 pr-10 text-[15px] text-[#1c1c1e] placeholder-[#3c3c43]/60 outline-none backdrop-blur-md"
+            placeholder="添加新计划"
           />
-          <button
-            type="button"
-            onClick={() => withFeedback(addPlan)}
-            className="rounded-2xl bg-[#008069] p-3 text-white shadow-md transition active:bg-[#25D366]"
-            aria-label="Add plan"
-          >
-            <Plus size={18} />
-          </button>
         </div>
+        <button
+          type="button"
+          onClick={() => withFeedback(addPlan)}
+          className="h-[36px] w-[36px] flex items-center justify-center rounded-full bg-[rgba(0,122,255,0.1)] text-[#007aff] transition-colors active:bg-[rgba(0,122,255,0.2)]"
+          aria-label="Add plan"
+        >
+          <Plus size={20} strokeWidth={2.5} />
+        </button>
       </div>
 
-      <div className="space-y-2 pb-2">
+      {/* Title */}
+      <div className="flex items-end justify-between px-1">
+        <span className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">我的计划</span>
+        <span className="text-[13px] font-medium text-[#8e8e93] mb-[2px]">
+          {doneCount}/{plans.length}
+        </span>
+      </div>
+
+      {/* Plan List */}
+      <div className="pb-4">
         {plans.length === 0 && (
-          <div className="rounded-2xl border border-white/60 bg-white/90 p-4 text-sm text-slate-500 shadow-lg">
-            {'\u6682\u65e0\u8ba1\u5212\uff0c\u4ece\u4e0a\u9762\u6dfb\u52a0\u4e00\u6761\u4efb\u52a1\u3002'}
+          <div className="ios-list-group p-6 text-center shadow-sm">
+            <p className="text-[15px] text-[#8e8e93]">暂无计划，从上面添加一条任务。</p>
           </div>
         )}
 
-        {plans.map((plan, index) => (
-          <article
-            key={plan.id}
-            className="animate-slide-up rounded-2xl border border-white/70 bg-white/95 p-3 shadow-md transition duration-200 hover:-translate-y-0.5"
-            style={{ animationDelay: `${index * 60}ms` }}
-          >
-            <div className="flex items-start gap-3">
-              <button
-                type="button"
-                onClick={() => withFeedback(() => togglePlan(plan.id))}
-                className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2 transition active:bg-slate-200 ${
-                  plan.completed
-                    ? 'border-[#008069] bg-[#008069] text-white'
-                    : 'border-slate-300 bg-white text-transparent'
-                }`}
-                aria-label="Toggle plan"
+        {plans.length > 0 && (
+          <div className="ios-list-group shadow-sm">
+            {plans.map((plan, index) => (
+              <div
+                key={plan.id}
+                className="ios-list-row animate-slide-up"
+                style={{ animationDelay: `${index * 40}ms` }}
               >
-                <Check size={13} />
-              </button>
-              <div className="min-w-0 flex-1">
-                <p
-                  className={`break-words text-sm ${
-                    plan.completed
-                      ? 'text-slate-400 line-through'
-                      : 'text-slate-800'
-                  }`}
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => withFeedback(() => togglePlan(plan.id))}
+                    className={`flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px] transition-all ${plan.completed
+                        ? 'border-[#007aff] bg-[#007aff] text-white'
+                        : 'border-[#c7c7cc] bg-transparent text-transparent active:bg-[rgba(0,122,255,0.1)]'
+                      }`}
+                    aria-label="Toggle plan"
+                  >
+                    <Check size={14} strokeWidth={3} />
+                  </button>
+
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <p
+                      className={`text-[16px] leading-[1.3] truncate transition-colors ${plan.completed
+                          ? 'text-[#8e8e93] line-through'
+                          : 'text-[#1c1c1e]'
+                        }`}
+                    >
+                      {plan.title}
+                    </p>
+                    <p className="text-[12px] text-[#aeaeb2] mt-1">
+                      {formatPlanTime(plan.updatedAt)}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => withFeedback(() => deletePlan(plan.id))}
+                  className="p-2 text-[#ff453a] active:opacity-50 transition-opacity"
+                  aria-label="Delete plan"
                 >
-                  {plan.title}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {'\u66f4\u65b0\u4e8e '}
-                  {formatPlanTime(plan.updatedAt)}
-                </p>
+                  <Trash2 size={18} strokeWidth={2} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => withFeedback(() => deletePlan(plan.id))}
-                className="rounded-xl p-2 text-slate-500 transition active:bg-slate-200"
-                aria-label="Delete plan"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          </article>
-        ))}
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

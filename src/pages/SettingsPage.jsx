@@ -18,137 +18,147 @@ export default function SettingsPage({
   setRemainingSeconds,
 }) {
   return (
-    <section className="animate-fade-in space-y-3">
-      <div className="rounded-3xl border border-white/60 bg-white/90 p-4 shadow-xl backdrop-blur">
-        <h2 className="text-sm font-semibold text-slate-800">{'\u8bbe\u7f6e'}</h2>
-        <div className="mt-3 space-y-3 text-left">
-          <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-slate-800">{'\u6309\u952e\u9707\u52a8\u53cd\u9988'}</p>
-              <p className="text-xs text-slate-500">{'\u70b9\u51fb\u6309\u94ae\u65f6\u89e6\u53d1\u8f7b\u5fae\u9707\u52a8'}</p>
+    <section className="animate-fade-in flex flex-col gap-6 pb-6 pt-2">
+
+      {/* General Settings Group */}
+      <div>
+        <h2 className="px-4 pb-2 text-[13px] font-semibold uppercase tracking-widest text-[#8e8e93]">通用</h2>
+        <div className="ios-list-group shadow-sm">
+          <label className="ios-list-row cursor-pointer" style={{ paddingRight: '12px' }}>
+            <div className="flex flex-col flex-1 pr-4">
+              <p className="text-[17px] font-semibold text-[#1c1c1e] leading-tight">按键震动反馈</p>
+              <p className="text-[13px] text-[#8e8e93] font-medium leading-tight mt-1">点击按钮时触发轻微震动</p>
             </div>
-            <input
-              type="checkbox"
-              checked={settings.vibrationEnabled}
-              onChange={(event) => {
-                setSettings((previous) => ({
-                  ...previous,
-                  vibrationEnabled: event.target.checked,
-                }))
-              }}
-              className="h-5 w-5 accent-[#008069]"
-            />
+            <div className="ios-toggle">
+              <input
+                type="checkbox"
+                checked={settings.vibrationEnabled}
+                onChange={(event) => {
+                  withFeedback(() => {
+                    setSettings((previous) => ({
+                      ...previous,
+                      vibrationEnabled: event.target.checked,
+                    }))
+                  })
+                }}
+              />
+              <span className="ios-toggle-track"></span>
+              <span className="ios-toggle-thumb"></span>
+            </div>
           </label>
+        </div>
+      </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-            <p className="text-sm font-medium text-slate-800">{'\u540e\u53f0\u5230\u70b9\u901a\u77e5'}</p>
-            <p className="mt-1 text-xs text-slate-500">
-              {notificationEnabled
-                ? '\u8bf7\u786e\u4fdd StudyFlow Alerts \u901a\u9053\u5df2\u5f00\u542f\u5f39\u7a97/\u61ac\u6d6e/\u6a2a\u5e45'
-                : '\u7cfb\u7edf\u4e2d\u6b64 App \u901a\u77e5\u603b\u5f00\u5173\u5df2\u5173\u95ed\uff0c\u8bf7\u5148\u5f00\u542f'}
+      {/* Notifications Group */}
+      <div>
+        <h2 className="px-4 pb-2 text-[13px] font-semibold uppercase tracking-widest text-[#8e8e93]">通知</h2>
+        <div className="ios-list-group shadow-sm p-4">
+          <p className="text-[17px] font-semibold text-[#1c1c1e]">后台到点通知</p>
+          <p className="mt-1 text-[13px] text-[#8e8e93] leading-snug">
+            {notificationEnabled
+              ? '请确保 StudyFlow Alerts 通道已开启弹窗/悬浮/横幅'
+              : '系统级通知开关已关闭，请先开启'}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              withFeedback(() => {
+                void openSystemNotificationSettings()
+              })
+            }}
+            className="mt-4 w-full h-[40px] rounded-[10px] bg-[rgba(60,60,67,0.08)] text-[15px] font-semibold text-[#007aff] transition active:bg-[rgba(60,60,67,0.15)]"
+          >
+            打开系统通知设置
+          </button>
+
+          {notificationError && (
+            <p className="mt-3 text-[13px] text-[#ff3b30] bg-[#ff3b30]/10 p-2 rounded-lg">{`错误: ${notificationError}`}</p>
+          )}
+
+          <div className="mt-4 rounded-[12px] bg-white border border-[rgba(60,60,67,0.1)] p-3">
+            <p className="text-[13px] font-semibold text-[#1c1c1e]">授权指引</p>
+            <p className="mt-1 text-[12px] text-[#8e8e93]">
+              1. 打开通道设置后，确保勾选了「弹窗」或「横幅」。<br />
+              2. 若主通知开关被拒，请先在系统授予 App 通知权。
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                withFeedback(() => {
-                  void openSystemNotificationSettings()
-                })
-              }}
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition active:bg-slate-200"
-            >
-              {'\u6253\u5f00StudyFlow Alerts\u901a\u9053\u8bbe\u7f6e'}
-            </button>
-
-            {notificationError && (
-              <p className="mt-2 text-xs text-red-600">{`\u9519\u8bef: ${notificationError}`}</p>
-            )}
-
-            <div className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-3">
-              <p className="text-xs font-semibold text-slate-700">{'\u6388\u6743\u6307\u5f15\uff08\u7b80\u5316\uff09'}</p>
-              <p className="mt-2 text-xs text-slate-600">
-                {`1. \u70b9\u300c\u6253\u5f00StudyFlow Alerts\u901a\u9053\u8bbe\u7f6e\u300d -> \u6253\u5f00\u300c\u5f39\u7a97/\u61ac\u6d6e/\u6a2a\u5e45\u300d`}
-              </p>
-              <p className="mt-1 text-xs text-slate-600">{`2. \u901a\u77e5\u603b\u5f00\u5173\u672a\u5f00\u65f6\uff0c\u8bf7\u5148\u5728\u7cfb\u7edf\u5c42\u6253\u5f00 App \u901a\u77e5`}</p>
-            </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded-3xl border border-white/60 bg-white/90 p-4 shadow-xl backdrop-blur">
-        <h2 className="text-sm font-semibold text-slate-800">{'\u5f00\u53d1\u8005\u6a21\u5f0f'}</h2>
-        <div className="mt-3 space-y-3 text-left">
-          <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-slate-800">
-                {'\u5f00\u542f\u5f00\u53d1\u8005\u529f\u80fd'}
-              </p>
-              <p className="text-xs text-slate-500">
-                {'\u663e\u793a\u300c\u53d1\u9001\u6d4b\u8bd5\u901a\u77e5/\u5f00\u542f\u7cbe\u786e\u63d0\u9192\u300d\u7b49\u9ad8\u7ea7\u64cd\u4f5c'}
-              </p>
+      {/* Advanced Settings Group */}
+      <div>
+        <h2 className="px-4 pb-2 text-[13px] font-semibold uppercase tracking-widest text-[#8e8e93]">开发者</h2>
+        <div className="ios-list-group shadow-sm">
+          <label className="ios-list-row cursor-pointer" style={{ paddingRight: '12px' }}>
+            <div className="flex flex-col flex-1 pr-4">
+              <p className="text-[17px] font-semibold text-[#1c1c1e] leading-tight">开启开发者功能</p>
+              <p className="text-[13px] text-[#8e8e93] font-medium leading-tight mt-1">显示测试通知、精确提醒等操作</p>
             </div>
-            <input
-              type="checkbox"
-              checked={settings.developerMode}
-              onChange={(event) => {
-                const enabled = event.target.checked
-                withFeedback(() => {
-                  setIsRunning(false)
-                  void cancelTimerNotification()
-                  setRemainingSeconds(FOCUS_DURATION_SECONDS)
-                  setSettings((previous) => ({
-                    ...previous,
-                    developerMode: enabled,
-                    shortTimerEnabled: enabled ? previous.shortTimerEnabled : false,
-                  }))
-                })
-              }}
-              className="h-5 w-5 accent-[#008069]"
-            />
+            <div className="ios-toggle">
+              <input
+                type="checkbox"
+                checked={settings.developerMode}
+                onChange={(event) => {
+                  const enabled = event.target.checked
+                  withFeedback(() => {
+                    setIsRunning(false)
+                    void cancelTimerNotification()
+                    setRemainingSeconds(FOCUS_DURATION_SECONDS)
+                    setSettings((previous) => ({
+                      ...previous,
+                      developerMode: enabled,
+                      shortTimerEnabled: enabled ? previous.shortTimerEnabled : false,
+                    }))
+                  })
+                }}
+              />
+              <span className="ios-toggle-track"></span>
+              <span className="ios-toggle-thumb"></span>
+            </div>
           </label>
 
           {settings.developerMode && (
             <>
-              <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium text-slate-800">
-                    {'5\u79d2\u5012\u8ba1\u65f6\uff08\u53ef\u9009\uff09'}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {'\u5f00\u542f\u540e\u4e13\u6ce8\u5012\u8ba1\u65f6\u4e3a 00:05\uff0c\u7528\u4e8e\u5feb\u901f\u9a8c\u8bc1'}
-                  </p>
+              <label className="ios-list-row cursor-pointer" style={{ paddingRight: '12px' }}>
+                <div className="flex flex-col flex-1 pr-4">
+                  <p className="text-[17px] font-semibold text-[#1c1c1e] leading-tight">短时专注 (5秒测试)</p>
+                  <p className="text-[13px] text-[#8e8e93] font-medium leading-tight mt-1">专时专注缩短为 5秒 用以全流程测试</p>
                 </div>
-                <input
-                  type="checkbox"
-                  checked={settings.shortTimerEnabled}
-                  onChange={(event) => {
-                    const enabled = event.target.checked
-                    withFeedback(() => {
-                      setIsRunning(false)
-                      void cancelTimerNotification()
-                      setRemainingSeconds(
-                        enabled ? DEBUG_FOCUS_DURATION_SECONDS : FOCUS_DURATION_SECONDS,
-                      )
-                      setSettings((previous) => ({
-                        ...previous,
-                        shortTimerEnabled: enabled,
-                      }))
-                    })
-                  }}
-                  className="h-5 w-5 accent-[#008069]"
-                />
+                <div className="ios-toggle">
+                  <input
+                    type="checkbox"
+                    checked={settings.shortTimerEnabled}
+                    onChange={(event) => {
+                      const enabled = event.target.checked
+                      withFeedback(() => {
+                        setIsRunning(false)
+                        void cancelTimerNotification()
+                        setRemainingSeconds(
+                          enabled ? DEBUG_FOCUS_DURATION_SECONDS : FOCUS_DURATION_SECONDS,
+                        )
+                        setSettings((previous) => ({
+                          ...previous,
+                          shortTimerEnabled: enabled,
+                        }))
+                      })
+                    }}
+                  />
+                  <span className="ios-toggle-track"></span>
+                  <span className="ios-toggle-thumb"></span>
+                </div>
               </label>
 
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                <p className="text-sm font-medium text-slate-800">{'\u5f00\u53d1\u8005\u8c03\u8bd5'}</p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {exactAlarmGranted
-                    ? '\u7cbe\u786e\u63d0\u9192\u5df2\u5f00\u542f'
-                    : '\u7cbe\u786e\u63d0\u9192\u672a\u5f00\u542f\uff0c\u77ed\u65f6\u901a\u77e5\u53ef\u80fd\u5ef6\u8fdf\u6216\u5931\u6548'}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {`\u5f53\u524d\u5f85\u89e6\u53d1\u901a\u77e5: ${pendingCount}`}
-                </p>
-                <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="ios-list-row flex-col items-stretch p-4 gap-3 bg-[rgba(118,118,128,0.06)] border-t-0">
+                <div>
+                  <p className="text-[15px] font-semibold text-[#1c1c1e]">调试看板</p>
+                  <p className="text-[13px] text-[#8e8e93] mt-1">
+                    {exactAlarmGranted ? '精确提醒已开启' : '精确提醒未开启，短时通知可能延迟'}
+                    <br />
+                    待触发的通知队列: {pendingCount}
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => {
@@ -156,9 +166,9 @@ export default function SettingsPage({
                         void scheduleTimerNotification(3)
                       })
                     }}
-                    className="rounded-xl bg-[#008069] px-3 py-2 text-xs font-medium text-white transition active:bg-[#25D366]"
+                    className="flex-1 rounded-[10px] bg-[#007aff] px-3 py-2 text-[14px] font-semibold text-white transition active:opacity-70"
                   >
-                    {'\u53d1\u90013\u79d2\u6d4b\u8bd5\u901a\u77e5'}
+                    发送 3秒 通知
                   </button>
                   <button
                     type="button"
@@ -170,9 +180,9 @@ export default function SettingsPage({
                         })
                       })
                     }}
-                    className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition active:bg-slate-200"
+                    className="flex-1 rounded-[10px] bg-[rgba(60,60,67,0.1)] px-3 py-2 text-[14px] font-semibold text-[#1c1c1e] transition active:bg-[rgba(60,60,67,0.2)]"
                   >
-                    {'\u5f00\u542f\u7cbe\u786e\u63d0\u9192'}
+                    开启精确提醒
                   </button>
                 </div>
                 <button
@@ -183,9 +193,9 @@ export default function SettingsPage({
                       void refreshExactAlarmStatus()
                     })
                   }}
-                  className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition active:bg-slate-200"
+                  className="w-full rounded-[10px] bg-white border border-[rgba(60,60,67,0.1)] px-3 py-2 text-[14px] font-semibold text-[#1c1c1e] transition active:bg-gray-50 shadow-sm"
                 >
-                  {'\u5237\u65b0\u8c03\u8bd5\u72b6\u6001'}
+                  刷新权限与队列状态
                 </button>
               </div>
             </>

@@ -17,14 +17,16 @@ export default function FocusPage({
   setRemainingSeconds,
   isRunning,
   scheduleTimerNotification,
+  radius = 110,
+  strokeWidth = 14,
 }) {
   return (
-    <section className="animate-fade-in flex min-h-full flex-col items-center justify-center gap-7">
+    <section className="animate-fade-in flex min-h-full flex-col items-center justify-center gap-8 relative mt-[-20px]">
       {needsPermissionGuide && (
-        <div className="w-full rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left">
-          <p className="text-sm font-semibold text-amber-800">{'\u9700\u8981\u5f00\u542f\u901a\u77e5\u6743\u9650'}</p>
-          <p className="mt-1 text-xs text-amber-700">
-            {'\u8bf7\u53bb\u8bbe\u7f6e\u9875\u5f00\u542f\u901a\u77e5\u901a\u9053\u4e0e\u5f39\u7a97/\u61ac\u6d6e\uff0c\u5426\u5219\u9000\u5230\u540e\u53f0\u53ef\u80fd\u4e0d\u5f39\u7a97\u3002'}
+        <div className="w-full rounded-[14px] bg-[rgba(255,59,48,0.1)] px-4 py-3 text-left backdrop-blur-md">
+          <p className="text-[13px] font-semibold text-[#ff3b30]">开启通知权限</p>
+          <p className="mt-1 text-[12px] leading-tight text-[#ff3b30]/80">
+            请确认已开启弹窗/悬浮/横幅通知，否则退到后台可能收不到提醒。
           </p>
           <button
             type="button"
@@ -35,45 +37,76 @@ export default function FocusPage({
                 void refreshNotificationStatus()
               })
             }
-            className="mt-2 rounded-xl border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 transition active:bg-amber-100"
+            className="mt-2 rounded-lg bg-white/60 px-3 py-1.5 text-[12px] font-semibold text-[#ff3b30] transition active:bg-white/40 shadow-sm"
           >
-            {'\u524d\u5f80\u8bbe\u7f6e\u9875'}
+            去设置
           </button>
         </div>
       )}
 
-      <div className="w-full rounded-3xl border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur">
-        <div className="mx-auto w-fit">
-          <div className="relative">
-            <svg className="h-64 w-64 -rotate-90" viewBox="0 0 240 240">
-              <circle
-                cx="120"
-                cy="120"
-                r="110"
-                fill="none"
-                stroke="#E2E8F0"
-                strokeWidth="12"
-              />
-              <circle
-                cx="120"
-                cy="120"
-                r="110"
-                fill="none"
-                stroke="#008069"
-                strokeWidth="12"
-                strokeLinecap="round"
-                strokeDasharray={circleCircumference}
-                strokeDashoffset={strokeOffset}
-                className="transition-all duration-500"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-5xl font-semibold text-slate-800">
+      <div className="w-full relative flex flex-col items-center">
+        <div className="relative flex items-center justify-center">
+          <svg className="h-72 w-72 -rotate-90 transform-gpu" viewBox="0 0 240 240">
+            {/* Track */}
+            <circle
+              cx="120"
+              cy="120"
+              r={radius}
+              fill="none"
+              stroke="var(--ios-gray6)"
+              strokeWidth={strokeWidth}
+            />
+            {/* Progress */}
+            <circle
+              cx="120"
+              cy="120"
+              r={radius}
+              fill="none"
+              stroke="var(--ios-blue)"
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeDasharray={circleCircumference}
+              strokeDashoffset={strokeOffset}
+              className="transition-all duration-1000 ease-linear"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+            <span className="text-[64px] font-bold text-[#1c1c1e] tabular-nums tracking-tight leading-none mb-1">
               {formatTime(remainingSeconds)}
-            </div>
+            </span>
+            <span className="text-[15px] font-medium text-[#8e8e93]">
+              {isRunning ? '专注中' : '准备开始'}
+            </span>
           </div>
         </div>
 
-        <div className="mt-5 flex justify-center">
+        <div className="mt-8 flex justify-center w-full max-w-[200px]">
+          <button
+            type="button"
+            onClick={() =>
+              withFeedback(() => {
+                if (isRunning) {
+                  setIsRunning(false)
+                  setTimerEndAt(null)
+                  void cancelTimerNotification()
+                  return
+                }
+
+                setTimerEndAt(Date.now() + remainingSeconds * 1000)
+                setIsRunning(true)
+                void scheduleTimerNotification(remainingSeconds)
+              })
+            }
+            className={`w-full rounded-full py-[14px] text-[17px] font-semibold transition-all active:scale-95 shadow-md ${isRunning
+                ? 'bg-[#f2f2f7] text-[#ff3b30] active:bg-[#e5e5ea]'
+                : 'bg-[#007aff] text-white active:bg-[#006ee6]'
+              }`}
+          >
+            {isRunning ? '暂停' : '开始'}
+          </button>
+        </div>
+
+        {!isRunning && remainingSeconds < focusDurationSeconds && (
           <button
             type="button"
             onClick={() =>
@@ -84,34 +117,12 @@ export default function FocusPage({
                 void cancelTimerNotification()
               })
             }
-            className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-600 shadow-sm transition active:bg-slate-200"
+            className="mt-4 text-[15px] text-[#8e8e93] active:text-[#1c1c1e] font-medium transition-colors"
           >
-            {'\u91cd\u7f6e'}
+            重置计时
           </button>
-        </div>
+        )}
       </div>
-
-      <button
-        type="button"
-        onClick={() =>
-          withFeedback(() => {
-            if (isRunning) {
-              setIsRunning(false)
-              setTimerEndAt(null)
-              void cancelTimerNotification()
-              return
-            }
-
-            setTimerEndAt(Date.now() + remainingSeconds * 1000)
-            setIsRunning(true)
-            void scheduleTimerNotification(remainingSeconds)
-          })
-        }
-        className="absolute bottom-35 right-5 rounded-2xl bg-[#008069] p-5 text-white shadow-xl transition active:bg-[#25D366]"
-        aria-label={isRunning ? 'Pause timer' : 'Start timer'}
-      >
-        <Clock3 size={24} />
-      </button>
     </section>
   )
 }
