@@ -117,7 +117,7 @@ export default function CountdownPage({ withFeedback }) {
   return (
     <section className="animate-fade-in flex min-h-full flex-col gap-4 pt-2">
       <div className="flex items-end justify-between px-1">
-        <span className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">倒计时</span>
+        <span className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">倒数日</span>
         <button
           type="button"
           onClick={() => withFeedback(() => setShowForm((v) => !v))}

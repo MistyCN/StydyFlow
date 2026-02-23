@@ -49,6 +49,34 @@ npm run build
 npm run preview
 ```
 
+## Deploy to HTTPS (Vercel)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/MistyCN/StydyFlow)
+
+### Option A: One-click deploy
+
+1. Click the button above.
+2. Sign in to Vercel and import the repo.
+3. Keep defaults:
+   - Framework Preset: `Vite`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+4. Click `Deploy`.
+
+Vercel will provide an HTTPS URL like `https://your-project.vercel.app`.
+
+### Option B: Manual deploy from dashboard
+
+1. Push your latest code to GitHub.
+2. Go to [vercel.com](https://vercel.com), then `Add New Project`.
+3. Select `MistyCN/StydyFlow`.
+4. Confirm build settings:
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+5. Deploy.
+
+After the first deployment, every `git push` to the connected branch triggers auto redeploy.
+
 ## Android (Capacitor)
 
 ```bash

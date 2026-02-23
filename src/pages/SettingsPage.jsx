@@ -52,7 +52,7 @@ export default function SettingsPage({
       <div>
         <h2 className="px-4 pb-2 text-[13px] font-semibold uppercase tracking-widest text-[#8e8e93]">通知</h2>
         <div className="ios-list-group shadow-sm p-4">
-          <p className="text-[17px] font-semibold text-[#1c1c1e]">后台倒计时提醒</p>
+          <p className="text-[17px] font-semibold text-[#1c1c1e]">后台倒数日提醒</p>
           <p className="mt-1 text-[13px] text-[#8e8e93] leading-snug">
             {notificationEnabled
               ? '请确认 StudyFlow Alerts 通道已开启弹窗/悬浮/横幅提醒。'

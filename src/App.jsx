@@ -485,14 +485,14 @@ function App() {
   const studySubItems = [
     { id: 'focus', label: '专注' },
     { id: 'plans', label: '计划' },
-    { id: 'countdown', label: '倒计时' },
+    { id: 'countdown', label: '倒数日' },
   ]
 
   const getPageTitle = () => {
     if (activeMainTab === 'interest') return '兴趣'
     if (activeMainTab === 'sport') return '运动'
     if (activeMainTab === 'settings') return '设置'
-    return '学习探索'
+    return '学习'
   }
 
   return (
