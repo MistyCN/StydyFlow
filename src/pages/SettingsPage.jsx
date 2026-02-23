@@ -19,8 +19,8 @@ export default function SettingsPage({
 }) {
   return (
     <section className="animate-fade-in flex flex-col gap-6 pb-6 pt-2">
+      <p className="text-center text-[13px] text-[#8e8e93]">StudyFlow v2.1</p>
 
-      {/* General Settings Group */}
       <div>
         <h2 className="px-4 pb-2 text-[13px] font-semibold uppercase tracking-widest text-[#8e8e93]">通用</h2>
         <div className="ios-list-group shadow-sm">
@@ -49,15 +49,14 @@ export default function SettingsPage({
         </div>
       </div>
 
-      {/* Notifications Group */}
       <div>
         <h2 className="px-4 pb-2 text-[13px] font-semibold uppercase tracking-widest text-[#8e8e93]">通知</h2>
         <div className="ios-list-group shadow-sm p-4">
-          <p className="text-[17px] font-semibold text-[#1c1c1e]">后台到点通知</p>
+          <p className="text-[17px] font-semibold text-[#1c1c1e]">后台倒计时提醒</p>
           <p className="mt-1 text-[13px] text-[#8e8e93] leading-snug">
             {notificationEnabled
-              ? '请确保 StudyFlow Alerts 通道已开启弹窗/悬浮/横幅'
-              : '系统级通知开关已关闭，请先开启'}
+              ? '请确认 StudyFlow Alerts 通道已开启弹窗/悬浮/横幅提醒。'
+              : '系统通知总开关已关闭，请先开启应用通知权限。'}
           </p>
           <button
             type="button"
@@ -78,21 +77,21 @@ export default function SettingsPage({
           <div className="mt-4 rounded-[12px] bg-white border border-[rgba(60,60,67,0.1)] p-3">
             <p className="text-[13px] font-semibold text-[#1c1c1e]">授权指引</p>
             <p className="mt-1 text-[12px] text-[#8e8e93]">
-              1. 打开通道设置后，确保勾选了「弹窗」或「横幅」。<br />
-              2. 若主通知开关被拒，请先在系统授予 App 通知权。
+              1. 打开通知通道后，确保勾选了“弹窗”或“横幅”。
+              <br />
+              2. 若系统级通知被拒绝，请先在系统里为 App 开启通知权限。
             </p>
           </div>
         </div>
       </div>
 
-      {/* Advanced Settings Group */}
       <div>
         <h2 className="px-4 pb-2 text-[13px] font-semibold uppercase tracking-widest text-[#8e8e93]">开发者</h2>
         <div className="ios-list-group shadow-sm">
           <label className="ios-list-row cursor-pointer" style={{ paddingRight: '12px' }}>
             <div className="flex flex-col flex-1 pr-4">
               <p className="text-[17px] font-semibold text-[#1c1c1e] leading-tight">开启开发者功能</p>
-              <p className="text-[13px] text-[#8e8e93] font-medium leading-tight mt-1">显示测试通知、精确提醒等操作</p>
+              <p className="text-[13px] text-[#8e8e93] font-medium leading-tight mt-1">显示测试通知、精确提醒等调试操作</p>
             </div>
             <div className="ios-toggle">
               <input
@@ -122,7 +121,7 @@ export default function SettingsPage({
               <label className="ios-list-row cursor-pointer" style={{ paddingRight: '12px' }}>
                 <div className="flex flex-col flex-1 pr-4">
                   <p className="text-[17px] font-semibold text-[#1c1c1e] leading-tight">短时专注 (5秒测试)</p>
-                  <p className="text-[13px] text-[#8e8e93] font-medium leading-tight mt-1">专时专注缩短为 5秒 用以全流程测试</p>
+                  <p className="text-[13px] text-[#8e8e93] font-medium leading-tight mt-1">将专注时间缩短为 5 秒，用于快速测试流程</p>
                 </div>
                 <div className="ios-toggle">
                   <input
@@ -148,13 +147,13 @@ export default function SettingsPage({
                 </div>
               </label>
 
-              <div className="ios-list-row flex-col items-stretch p-4 gap-3 bg-[rgba(118,118,128,0.06)] border-t-0">
+              <div className="px-4 pb-4 pt-2 flex flex-col gap-3 border-t border-[rgba(60,60,67,0.1)]">
                 <div>
                   <p className="text-[15px] font-semibold text-[#1c1c1e]">调试看板</p>
                   <p className="text-[13px] text-[#8e8e93] mt-1">
                     {exactAlarmGranted ? '精确提醒已开启' : '精确提醒未开启，短时通知可能延迟'}
                     <br />
-                    待触发的通知队列: {pendingCount}
+                    待触发通知队列: {pendingCount}
                   </p>
                 </div>
 
@@ -168,7 +167,7 @@ export default function SettingsPage({
                     }}
                     className="flex-1 rounded-[10px] bg-[#007aff] px-3 py-2 text-[14px] font-semibold text-white transition active:opacity-70"
                   >
-                    发送 3秒 通知
+                    发送 3 秒通知
                   </button>
                   <button
                     type="button"

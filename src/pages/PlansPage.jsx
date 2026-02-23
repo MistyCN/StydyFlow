@@ -13,8 +13,6 @@ export default function PlansPage({
 }) {
   return (
     <section className="animate-fade-in flex min-h-full flex-col gap-5 pt-2">
-
-      {/* Search / Add Input */}
       <div className="relative flex items-center gap-3">
         <div className="relative flex-1">
           <input
@@ -41,7 +39,6 @@ export default function PlansPage({
         </button>
       </div>
 
-      {/* Title */}
       <div className="flex items-end justify-between px-1">
         <span className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">我的计划</span>
         <span className="text-[13px] font-medium text-[#8e8e93] mb-[2px]">
@@ -49,7 +46,6 @@ export default function PlansPage({
         </span>
       </div>
 
-      {/* Plan List */}
       <div className="pb-4">
         {plans.length === 0 && (
           <div className="ios-list-group p-6 text-center shadow-sm">
@@ -70,8 +66,8 @@ export default function PlansPage({
                     type="button"
                     onClick={() => withFeedback(() => togglePlan(plan.id))}
                     className={`flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px] transition-all ${plan.completed
-                        ? 'border-[#007aff] bg-[#007aff] text-white'
-                        : 'border-[#c7c7cc] bg-transparent text-transparent active:bg-[rgba(0,122,255,0.1)]'
+                      ? 'border-[#007aff] bg-[#007aff] text-white'
+                      : 'border-[#c7c7cc] bg-transparent text-transparent active:bg-[rgba(0,122,255,0.1)]'
                       }`}
                     aria-label="Toggle plan"
                   >
@@ -81,8 +77,8 @@ export default function PlansPage({
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     <p
                       className={`text-[16px] leading-[1.3] truncate transition-colors ${plan.completed
-                          ? 'text-[#8e8e93] line-through'
-                          : 'text-[#1c1c1e]'
+                        ? 'text-[#8e8e93] line-through'
+                        : 'text-[#1c1c1e]'
                         }`}
                     >
                       {plan.title}

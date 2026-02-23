@@ -9,7 +9,9 @@ export default function InterestPage() {
         </div>
         <p className="text-[17px] font-semibold text-[#1c1c1e] mb-1">兴趣功能</p>
         <p className="text-[14px] text-[#8e8e93] leading-tight px-2">
-          发现并培养你的新兴趣。<br />即将推出，敬请期待。
+          发现并培养你的新兴趣。
+          <br />
+          即将推出，敬请期待。
         </p>
       </div>
     </section>

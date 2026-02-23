@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Plus, Trash2, X, CalendarDays, Clock } from 'lucide-react'
 
 const COUNTDOWN_STORAGE_KEY = 'studyflow-countdowns'
@@ -35,13 +36,13 @@ function CountdownModal({ item, onClose }) {
   const isPast = days < 0
   const absDays = Math.abs(days)
 
-  return (
+  return createPortal(
     <div
-      className="absolute inset-0 z-30 flex items-end justify-center bg-black/30 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-xl animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full h-fit bg-[#f2f2f7]/90 backdrop-blur-xl rounded-t-[32px] pt-3 pb-safe-bottom px-0 shadow-2xl relative animate-slide-up"
+        className="w-full h-fit bg-[#f2f2f7]/90 backdrop-blur-xl rounded-t-[32px] pt-3 pb-safe-bottom px-0 shadow-2xl relative animate-sheet-up"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-2 h-1.5 w-12 rounded-full bg-[#c7c7cc]" />
@@ -83,7 +84,8 @@ function CountdownModal({ item, onClose }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
@@ -115,7 +117,7 @@ export default function CountdownPage({ withFeedback }) {
   return (
     <section className="animate-fade-in flex min-h-full flex-col gap-4 pt-2">
       <div className="flex items-end justify-between px-1">
-        <span className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">倒计日</span>
+        <span className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">倒计时</span>
         <button
           type="button"
           onClick={() => withFeedback(() => setShowForm((v) => !v))}

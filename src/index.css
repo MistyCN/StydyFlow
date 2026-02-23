@@ -186,6 +186,14 @@ body {
   border-bottom: none;
 }
 
+/* ── Safe area ────────────────────────────────────────── */
+
+.pb-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.animate-sheet-up { animation: slideUpModal 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
 /* ── Scrollbar hide ───────────────────────────────────── */
 
 ::-webkit-scrollbar { display: none; }

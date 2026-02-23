@@ -113,7 +113,6 @@ export default function SportPage({ withFeedback }) {
         </div>
       )}
 
-      {/* iOS Activity List */}
       <div className="ios-list-group shadow-sm mb-6">
         {runs.map((run) => (
           <div key={run.id} className="ios-list-row">

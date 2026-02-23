@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Activity, BookOpenText, CalendarDays, Clock3, Settings, Sparkles } from 'lucide-react'
 
 import {
   FOCUS_DURATION_SECONDS,
-  DEBUG_FOCUS_DURATION_SECONDS,
   TIMER_NOTIFICATION_ID,
   TIMER_CHANNEL_ID,
   SETTINGS_STORAGE_KEY,
@@ -20,25 +19,136 @@ import CountdownPage from './pages/CountdownPage'
 import InterestPage from './pages/InterestPage'
 import SportPage from './pages/SportPage'
 
+const WORK_HISTORY_STORAGE_KEY = 'studyflow-work-history'
+const REST_DURATION_SECONDS = 5 * 60
+const DEFAULT_CUSTOM_DURATION_SECONDS = 15 * 60
+
+function getTimerCompletionCopy(mode) {
+  if (mode === 'rest') {
+    return {
+      title: '\u4f11\u606f\u7ed3\u675f',
+      body: '\u4f11\u606f\u65f6\u95f4\u5230\u4e86\uff0c\u53ef\u4ee5\u5f00\u59cb\u4e0b\u4e00\u8f6e\u5de5\u4f5c\u3002',
+    }
+  }
+  if (mode === 'custom') {
+    return {
+      title: '\u81ea\u5b9a\u4e49\u8ba1\u65f6\u7ed3\u675f',
+      body: '\u672c\u6b21\u81ea\u5b9a\u4e49\u8ba1\u65f6\u5df2\u5b8c\u6210\u3002',
+    }
+  }
+  return {
+    title: '\u5de5\u4f5c\u7ed3\u675f',
+    body: '\u672c\u6b21\u4e13\u6ce8\u5df2\u5b8c\u6210\uff0c\u53ef\u4ee5\u4f11\u606f\u4e00\u4e0b\u3002',
+  }
+}
+
+function loadWorkHistory() {
+  try {
+    const raw = localStorage.getItem(WORK_HISTORY_STORAGE_KEY)
+    if (!raw) {
+      return []
+    }
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((item) => {
+          if (!item || typeof item !== 'object') {
+            return null
+          }
+          if (
+            typeof item.id !== 'string' ||
+            typeof item.startAt !== 'number' ||
+            typeof item.endAt !== 'number' ||
+            typeof item.durationSeconds !== 'number' ||
+            item.durationSeconds <= 0
+          ) {
+            return null
+          }
+          return {
+            id: item.id,
+            startAt: item.startAt,
+            endAt: item.endAt,
+            durationSeconds: Math.floor(item.durationSeconds),
+            note: typeof item.note === 'string' ? item.note : '',
+          }
+        })
+        .filter(Boolean)
+    }
+    if (!parsed || typeof parsed !== 'object') {
+      return []
+    }
+    // Legacy format migration: { 'YYYY-MM-DD': number | { seconds, note } }
+    return Object.entries(parsed)
+      .map(([dateKey, value]) => {
+        if (typeof dateKey !== 'string') {
+          return null
+        }
+        const dayStart = new Date(`${dateKey}T00:00:00`).getTime()
+        if (Number.isNaN(dayStart)) {
+          return null
+        }
+        const seconds =
+          typeof value === 'number'
+            ? value
+            : value && typeof value === 'object' && typeof value.seconds === 'number'
+              ? value.seconds
+              : 0
+        if (seconds <= 0) {
+          return null
+        }
+        const safeSeconds = Math.floor(seconds)
+        return {
+          id: `legacy-${dateKey}-${safeSeconds}`,
+          startAt: dayStart,
+          endAt: dayStart + safeSeconds * 1000,
+          durationSeconds: safeSeconds,
+          note: value && typeof value === 'object' && typeof value.note === 'string' ? value.note : '',
+        }
+      })
+      .filter(Boolean)
+  } catch {
+    return []
+  }
+}
+
 function App() {
   const [activeMainTab, setActiveMainTab] = useState('study')
   const [activeTab, setActiveTab] = useState('focus')
   const [isRunning, setIsRunning] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
   const [plans, setPlans] = useState(() => loadPlans())
   const [planDraft, setPlanDraft] = useState('')
   const [settings, setSettings] = useState(() => loadSettings())
   const [showFinishModal, setShowFinishModal] = useState(false)
+  const [finishedTimerMode, setFinishedTimerMode] = useState('work')
   const [exactAlarmGranted, setExactAlarmGranted] = useState(true)
   const [notificationEnabled, setNotificationEnabled] = useState(true)
   const [pendingCount, setPendingCount] = useState(0)
   const [notificationError, setNotificationError] = useState('')
   const [timerEndAt, setTimerEndAt] = useState(null)
+  const [currentSessionStartedAt, setCurrentSessionStartedAt] = useState(null)
+  const [currentSessionDurationSeconds, setCurrentSessionDurationSeconds] = useState(0)
+  const [activeTimerMode, setActiveTimerMode] = useState('work')
+  const [customCountsAsWork, setCustomCountsAsWork] = useState(false)
+  const [customDurationSeconds, setCustomDurationSeconds] = useState(DEFAULT_CUSTOM_DURATION_SECONDS)
+  const [workHistory, setWorkHistory] = useState(() => loadWorkHistory())
   const needsPermissionGuide = !notificationEnabled || (settings.developerMode && !exactAlarmGranted)
 
-  const focusDurationSeconds = settings.shortTimerEnabled
-    ? DEBUG_FOCUS_DURATION_SECONDS
-    : FOCUS_DURATION_SECONDS
-  const [remainingSeconds, setRemainingSeconds] = useState(focusDurationSeconds)
+  const workDurationSeconds = FOCUS_DURATION_SECONDS
+  const normalizedCustomDurationSeconds = Math.max(1, Math.floor(customDurationSeconds))
+
+  const getModeDuration = (mode) => {
+    if (mode === 'rest') return REST_DURATION_SECONDS
+    if (mode === 'custom') return normalizedCustomDurationSeconds
+    return workDurationSeconds
+  }
+
+  const currentModeDurationSeconds = getModeDuration(activeTimerMode)
+  const [remainingSeconds, setRemainingSeconds] = useState(workDurationSeconds)
+
+  const saveWorkHistory = (nextHistory) => {
+    localStorage.setItem(WORK_HISTORY_STORAGE_KEY, JSON.stringify(nextHistory))
+  }
 
   const cancelTimerNotification = async () => {
     try {
@@ -132,7 +242,7 @@ function App() {
     }
   }
 
-  const scheduleTimerNotification = async (seconds) => {
+  const scheduleTimerNotification = async (seconds, mode = 'work') => {
     if (seconds <= 0) {
       return
     }
@@ -151,6 +261,7 @@ function App() {
         setExactAlarmGranted(true)
       }
 
+      const copy = getTimerCompletionCopy(mode)
       await LocalNotifications.cancel({
         notifications: [{ id: TIMER_NOTIFICATION_ID }],
       })
@@ -158,8 +269,8 @@ function App() {
         notifications: [
           {
             id: TIMER_NOTIFICATION_ID,
-            title: '倒计时结束',
-            body: '专注时间已完成，可以休息一下。',
+            title: copy.title,
+            body: copy.body,
             channelId: TIMER_CHANNEL_ID,
             schedule: {
               at: new Date(Date.now() + seconds * 1000),
@@ -209,10 +320,39 @@ function App() {
     const tick = () => {
       const nextRemaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000))
       if (nextRemaining <= 0) {
+        const shouldRecordAsWork =
+          activeTimerMode === 'work' || (activeTimerMode === 'custom' && customCountsAsWork)
+        if (shouldRecordAsWork) {
+          const endAt = Date.now()
+          const durationSeconds =
+            currentSessionDurationSeconds > 0
+              ? currentSessionDurationSeconds
+              : getModeDuration(activeTimerMode)
+          const startAt = currentSessionStartedAt ?? (endAt - durationSeconds * 1000)
+          setWorkHistory((previous) => {
+            const nextHistory = [
+              {
+                id: crypto.randomUUID(),
+                startAt,
+                endAt,
+                durationSeconds,
+                note: '',
+                sourceMode: activeTimerMode,
+              },
+              ...previous,
+            ]
+            saveWorkHistory(nextHistory)
+            return nextHistory
+          })
+        }
         setIsRunning(false)
+        setIsPaused(false)
         setTimerEndAt(null)
+        setCurrentSessionStartedAt(null)
+        setCurrentSessionDurationSeconds(0)
+        setFinishedTimerMode(activeTimerMode)
         setShowFinishModal(true)
-        setRemainingSeconds(focusDurationSeconds)
+        setRemainingSeconds(getModeDuration(activeTimerMode))
         if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
           void LocalNotifications.cancel({
             notifications: [{ id: TIMER_NOTIFICATION_ID }],
@@ -236,7 +376,52 @@ function App() {
         document.removeEventListener('visibilitychange', tick)
       }
     }
-  }, [isRunning, timerEndAt, focusDurationSeconds])
+  }, [
+    isRunning,
+    timerEndAt,
+    activeTimerMode,
+    workDurationSeconds,
+    normalizedCustomDurationSeconds,
+    customCountsAsWork,
+    currentSessionStartedAt,
+    currentSessionDurationSeconds,
+  ])
+
+  useEffect(() => {
+    if (!isRunning && !isPaused) {
+      setRemainingSeconds(getModeDuration(activeTimerMode))
+      if (timerEndAt === null) {
+        setCurrentSessionStartedAt(null)
+        setCurrentSessionDurationSeconds(0)
+      }
+    }
+  }, [isRunning, isPaused, activeTimerMode, workDurationSeconds, normalizedCustomDurationSeconds, timerEndAt])
+
+  const updateWorkHistoryNote = (sessionId, note) => {
+    setWorkHistory((previous) => {
+      const nextHistory = previous.map((entry) =>
+        entry.id === sessionId
+          ? {
+            ...entry,
+            note: note.trim(),
+          }
+          : entry,
+      )
+      saveWorkHistory(nextHistory)
+      return nextHistory
+    })
+  }
+
+  const deleteWorkHistoryEntry = (sessionId) => {
+    setWorkHistory((previous) => {
+      const nextHistory = previous.filter((entry) => entry.id !== sessionId)
+      if (nextHistory.length === previous.length) {
+        return previous
+      }
+      saveWorkHistory(nextHistory)
+      return nextHistory
+    })
+  }
 
   useEffect(() => {
     localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(plans))
@@ -247,8 +432,8 @@ function App() {
   }, [settings])
 
   const progress = useMemo(
-    () => (focusDurationSeconds - remainingSeconds) / focusDurationSeconds,
-    [focusDurationSeconds, remainingSeconds],
+    () => (currentModeDurationSeconds - remainingSeconds) / currentModeDurationSeconds,
+    [currentModeDurationSeconds, remainingSeconds],
   )
 
   const doneCount = useMemo(
@@ -300,7 +485,7 @@ function App() {
   const studySubItems = [
     { id: 'focus', label: '专注' },
     { id: 'plans', label: '计划' },
-    { id: 'countdown', label: '倒计日' },
+    { id: 'countdown', label: '倒计时' },
   ]
 
   const getPageTitle = () => {
@@ -356,15 +541,29 @@ function App() {
               circleCircumference={circleCircumference}
               strokeOffset={strokeOffset}
               remainingSeconds={remainingSeconds}
-              focusDurationSeconds={focusDurationSeconds}
+              currentModeDurationSeconds={currentModeDurationSeconds}
               cancelTimerNotification={cancelTimerNotification}
               setIsRunning={setIsRunning}
               setTimerEndAt={setTimerEndAt}
               setRemainingSeconds={setRemainingSeconds}
               isRunning={isRunning}
+              isPaused={isPaused}
+              setIsPaused={setIsPaused}
+              setCurrentSessionStartedAt={setCurrentSessionStartedAt}
+              setCurrentSessionDurationSeconds={setCurrentSessionDurationSeconds}
               scheduleTimerNotification={scheduleTimerNotification}
               radius={radius}
               strokeWidth={strokeWidth}
+              activeTimerMode={activeTimerMode}
+              setActiveTimerMode={setActiveTimerMode}
+              customDurationSeconds={normalizedCustomDurationSeconds}
+              setCustomDurationSeconds={setCustomDurationSeconds}
+              customCountsAsWork={customCountsAsWork}
+              setCustomCountsAsWork={setCustomCountsAsWork}
+              getModeDuration={getModeDuration}
+              workHistory={workHistory}
+              updateWorkHistoryNote={updateWorkHistoryNote}
+              deleteWorkHistoryEntry={deleteWorkHistoryEntry}
             />
           )}
 
@@ -455,9 +654,11 @@ function App() {
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20 backdrop-blur-sm px-4 animate-fade-in">
             <div className="w-[270px] rounded-[14px] bg-white/90 backdrop-blur-xl text-center shadow-2xl flex flex-col overflow-hidden animate-spring-in">
               <div className="p-4 pt-5 pb-4">
-                <h3 className="text-[17px] font-semibold text-[#1c1c1e] tracking-tight">倒计时结束</h3>
+                <h3 className="text-[17px] font-semibold text-[#1c1c1e] tracking-tight">
+                  {getTimerCompletionCopy(finishedTimerMode).title}
+                </h3>
                 <p className="mt-1 text-[13px] leading-tight text-[#1c1c1e]">
-                  专注时间已完成，可以休息一下。
+                  {getTimerCompletionCopy(finishedTimerMode).body}
                 </p>
               </div>
               <div className="border-t border-[rgba(60,60,67,0.18)]">
@@ -482,3 +683,5 @@ function App() {
 }
 
 export default App
+
+
