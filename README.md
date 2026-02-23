@@ -1,4 +1,4 @@
-# StudyFlow
+# StudyFlow [This is a vibe-coding project]
 
 StudyFlow is a lightweight study app focused on two things:
 
