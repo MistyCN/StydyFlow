@@ -42,24 +42,24 @@ function CountdownModal({ item, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full h-fit bg-[#f2f2f7]/90 backdrop-blur-xl rounded-t-[32px] pt-3 pb-safe-bottom px-0 shadow-2xl relative animate-sheet-up"
+        className="glass-card relative h-fit w-full rounded-t-[32px] px-0 pb-safe-bottom pt-3 shadow-2xl animate-sheet-up"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-2 h-1.5 w-12 rounded-full bg-[#c7c7cc]" />
 
         <div className="flex items-center justify-between px-5 py-2">
-          <h3 className="text-[20px] font-bold text-[#1c1c1e] tracking-tight truncate pr-4">{item.title}</h3>
+          <h3 className="text-ink truncate pr-4 text-[20px] font-bold tracking-tight">{item.title}</h3>
           <button type="button" onClick={onClose} className="flex-shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-[rgba(60,60,67,0.18)] text-[#8e8e93] active:opacity-50 transition-opacity">
             <X size={16} strokeWidth={3} />
           </button>
         </div>
 
         <div className="px-5 pb-8 pt-2">
-          <div className={`rounded-3xl p-8 text-center mb-4 shadow-sm ${isPast ? 'bg-[#e5e5ea]' : 'bg-[#007aff]'}`}>
-            <p className={`text-[80px] font-bold tabular-nums leading-none tracking-tighter ${isPast ? 'text-[#8e8e93]' : 'text-white'}`}>
+          <div className={`mb-4 rounded-3xl p-8 text-center shadow-sm ${isPast ? 'glass-soft' : 'liquid-primary'}`}>
+            <p className={`text-[80px] font-bold tabular-nums leading-none tracking-tighter ${isPast ? 'text-ink-subtle' : 'text-white'}`}>
               {absDays}
             </p>
-            <p className={`mt-2 text-[15px] font-medium ${isPast ? 'text-[#8e8e93]' : 'text-white/80'}`}>
+            <p className={`mt-2 text-[15px] font-medium ${isPast ? 'text-ink-subtle' : 'text-white/80'}`}>
               {isToday ? '就是今天' : isPast ? '天前已过' : '天后'}
             </p>
           </div>
@@ -68,18 +68,18 @@ function CountdownModal({ item, onClose }) {
             <div className="ios-list-row min-h-[44px]">
               <div className="flex items-center gap-3">
                 <CalendarDays size={20} className="text-[#007aff]" strokeWidth={2.5} />
-                <span className="text-[17px] text-[#1c1c1e]">日期</span>
+                <span className="text-ink text-[17px]">日期</span>
               </div>
-              <span className="text-[17px] text-[#8e8e93] pr-1">
+              <span className="text-ink-subtle pr-1 text-[17px]">
                 {`${target.getFullYear()}年${monthNames[target.getMonth()]}${target.getDate()}日`}
               </span>
             </div>
             <div className="ios-list-row min-h-[44px]">
               <div className="flex items-center gap-3">
                 <Clock size={20} className="text-[#007aff]" strokeWidth={2.5} />
-                <span className="text-[17px] text-[#1c1c1e]">星期</span>
+                <span className="text-ink text-[17px]">星期</span>
               </div>
-              <span className="text-[17px] text-[#8e8e93] pr-1">{weekNames[target.getDay()]}</span>
+              <span className="text-ink-subtle pr-1 text-[17px]">{weekNames[target.getDay()]}</span>
             </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function CountdownPage({ withFeedback }) {
   return (
     <section className="animate-fade-in flex min-h-full flex-col gap-4 pt-2">
       <div className="flex items-end justify-between px-1">
-        <span className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">倒数日</span>
+        <span className="text-ink text-[20px] font-bold tracking-tight">倒数日</span>
         <button
           type="button"
           onClick={() => withFeedback(() => setShowForm((v) => !v))}
@@ -136,18 +136,18 @@ export default function CountdownPage({ withFeedback }) {
               value={draft.title}
               onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
               placeholder="事件名称"
-              className="h-10 w-full rounded-xl bg-[rgba(118,118,128,0.12)] px-4 text-[17px] text-[#1c1c1e] placeholder-[#3c3c43]/60 outline-none"
+              className="glass-soft text-ink h-10 w-full rounded-xl px-4 text-[17px] placeholder:text-[#5d7292] outline-none"
             />
             <input
               type="date"
               value={draft.date}
               onChange={(e) => setDraft((d) => ({ ...d, date: e.target.value }))}
-              className="h-10 w-full rounded-xl bg-[rgba(118,118,128,0.12)] px-4 text-[17px] text-[#1c1c1e] outline-none"
+              className="glass-soft text-ink h-10 w-full rounded-xl px-4 text-[17px] outline-none"
             />
             <button
               type="button"
               onClick={() => withFeedback(addItem)}
-              className="mt-1 h-[44px] w-full rounded-xl bg-[#007aff] text-[17px] font-semibold text-white transition-opacity active:opacity-70"
+              className="liquid-primary liquid-ripple mt-1 h-[44px] w-full rounded-xl text-[17px] font-semibold transition-opacity active:opacity-70"
             >
               完成
             </button>
@@ -157,7 +157,7 @@ export default function CountdownPage({ withFeedback }) {
 
       {items.length === 0 && !showForm && (
         <div className="ios-list-group p-6 text-center shadow-sm">
-          <p className="text-[15px] text-[#8e8e93]">暂无记录，点击右上角添加。</p>
+          <p className="text-ink-subtle text-[15px]">暂无记录，点击右上角添加。</p>
         </div>
       )}
 
@@ -172,15 +172,15 @@ export default function CountdownPage({ withFeedback }) {
               onClick={() => withFeedback(() => setSelectedItem(item))}
             >
               <div className="flex flex-col pr-4">
-                <p className="text-[17px] font-semibold text-[#1c1c1e] mb-1 leading-tight tracking-tight">{item.title}</p>
-                <p className="text-[13px] text-[#8e8e93] font-medium">{item.date}</p>
+                <p className="text-ink mb-1 text-[17px] font-semibold leading-tight tracking-tight">{item.title}</p>
+                <p className="text-ink-subtle text-[13px] font-medium">{item.date}</p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex flex-col items-end justify-center">
-                  <p className={`text-[28px] font-bold tabular-nums leading-none tracking-tight ${isPast ? 'text-[#8e8e93]' : 'text-[#007aff]'}`}>
+                  <p className={`text-[28px] font-bold tabular-nums leading-none tracking-tight ${isPast ? 'text-ink-subtle' : 'text-[#2d78dc]'}`}>
                     {Math.abs(days)}
                   </p>
-                  <p className="text-[11px] text-[#8e8e93] font-medium mt-1">
+                  <p className="text-ink-subtle mt-1 text-[11px] font-medium">
                     {days === 0 ? '今天' : days > 0 ? '天后' : '已过'}
                   </p>
                 </div>

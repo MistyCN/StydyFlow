@@ -496,13 +496,17 @@ function App() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center p-0 text-[#1c1c1e] sm:p-3 overflow-hidden">
-      <div className="relative flex h-[100svh] w-full flex-col overflow-hidden sm:h-[96svh] sm:w-auto sm:max-h-[900px] sm:aspect-[9/19.5] sm:rounded-[2.5rem] sm:border-[8px] sm:border-black sm:shadow-2xl bg-transparent">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-0 sm:p-3">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -left-10 top-8 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(229,250,255,0.75),rgba(167,202,241,0.15)_70%)] blur-2xl" />
+        <div className="absolute -right-12 bottom-14 h-60 w-60 rounded-full bg-[radial-gradient(circle,rgba(143,201,255,0.45),rgba(145,180,229,0.08)_70%)] blur-2xl" />
+      </div>
+      <div className="relative flex h-[100svh] w-full flex-col overflow-hidden border-white/10 bg-[linear-gradient(165deg,rgba(248,252,255,0.3),rgba(202,224,247,0.14))] sm:h-[96svh] sm:w-auto sm:max-h-[900px] sm:aspect-[9/19.5] sm:rounded-[2.5rem] sm:border sm:shadow-[0_26px_68px_rgba(23,46,78,0.4)]">
 
         {/* iOS Header */}
-        <header className="sticky top-0 z-20 glass-card rounded-none border-x-0 border-t-0 px-4 pt-4 pb-3 h-fit flex-none">
+        <header className="glass-card sticky top-0 z-20 h-fit flex-none rounded-none border-x-0 border-t-0 border-b border-b-white/35 px-4 pb-3 pt-4">
           <div className="flex items-center justify-center mb-1 w-full relative h-[28px]">
-            <h1 className="text-[17px] font-semibold tracking-tight absolute inset-0 flex items-center justify-center pointer-events-none">
+            <h1 className="text-ink absolute inset-0 flex items-center justify-center text-[17px] font-semibold tracking-tight pointer-events-none">
               {getPageTitle()}
             </h1>
           </div>
@@ -613,8 +617,8 @@ function App() {
         </main>
 
         {/* iOS Tab Bar */}
-        <nav className="absolute bottom-0 left-0 right-0 z-20 flex bg-white/75 backdrop-blur-[30px] border-t border-[rgba(60,60,67,0.1)] pb-safe-bottom">
-          <div className="flex w-full items-start justify-between px-2 pt-2 pb-6">
+        <nav className="glass-card absolute bottom-0 left-0 right-0 z-20 flex rounded-none border-x-0 border-b-0 border-t border-t-white/45 pb-safe-bottom backdrop-blur-[34px]">
+          <div className="flex w-full items-start justify-between px-2 pb-6 pt-2">
             {mainNavItems.map((item) => {
               const isActive = activeMainTab === item.id
               const Icon = item.icon
@@ -634,7 +638,7 @@ function App() {
                       }
                     })
                   }
-                  className={`flex flex-1 flex-col items-center gap-[4px] pt-1 text-[10px] font-medium transition-colors ${isActive ? 'text-[#007aff]' : 'text-[#8e8e93]'
+                  className={`liquid-ripple flex flex-1 flex-col items-center gap-[4px] rounded-2xl py-1 text-[10px] font-semibold transition-all ${isActive ? 'text-[#3b82f6] drop-shadow-[0_0_14px_rgba(69,153,255,0.42)]' : 'text-[#607694]'
                     }`}
                 >
                   <Icon
@@ -651,17 +655,17 @@ function App() {
 
         {/* iOS Alert Modal */}
         {showFinishModal && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20 backdrop-blur-sm px-4 animate-fade-in">
-            <div className="w-[270px] rounded-[14px] bg-white/90 backdrop-blur-xl text-center shadow-2xl flex flex-col overflow-hidden animate-spring-in">
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#0e1f37]/20 px-4 backdrop-blur-sm animate-fade-in">
+            <div className="glass-card flex w-[278px] flex-col overflow-hidden rounded-[18px] text-center animate-spring-in">
               <div className="p-4 pt-5 pb-4">
-                <h3 className="text-[17px] font-semibold text-[#1c1c1e] tracking-tight">
+                <h3 className="text-ink text-[17px] font-semibold tracking-tight">
                   {getTimerCompletionCopy(finishedTimerMode).title}
                 </h3>
-                <p className="mt-1 text-[13px] leading-tight text-[#1c1c1e]">
+                <p className="text-ink-soft mt-1 text-[13px] leading-tight">
                   {getTimerCompletionCopy(finishedTimerMode).body}
                 </p>
               </div>
-              <div className="border-t border-[rgba(60,60,67,0.18)]">
+              <div className="border-t border-white/45">
                 <button
                   type="button"
                   onClick={() =>
@@ -669,7 +673,7 @@ function App() {
                       setShowFinishModal(false)
                     })
                   }
-                  className="w-full text-[#007aff] px-4 py-[11px] text-[17px] font-semibold active:bg-[rgba(60,60,67,0.1)] transition-colors"
+                  className="liquid-ripple w-full px-4 py-[11px] text-[17px] font-semibold text-[#3b82f6] transition-colors active:bg-white/20"
                 >
                   我知道了
                 </button>

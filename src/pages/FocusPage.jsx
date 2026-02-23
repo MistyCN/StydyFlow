@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { History, X } from 'lucide-react'
+import { History } from 'lucide-react'
 import { formatTime } from '../utils'
 
 const WHEEL_ITEM_HEIGHT = 40
@@ -51,7 +51,7 @@ function WheelColumn({ label, value, options, onChange, withFeedback }) {
 
   return (
     <div className="relative flex-1">
-      <p className="mb-2 text-center text-[13px] font-medium text-[#8e8e93]">{label}</p>
+      <p className="text-ink-subtle mb-2 text-center text-[13px] font-medium">{label}</p>
       <div className="relative">
         <div
           ref={containerRef}
@@ -74,7 +74,7 @@ function WheelColumn({ label, value, options, onChange, withFeedback }) {
             <button
               key={item}
               type="button"
-              className={`h-10 w-full text-center text-[20px] tabular-nums transition-colors ${item === value ? 'text-[#1c1c1e] font-semibold' : 'text-[#8e8e93]'}`}
+              className={`h-10 w-full text-center text-[20px] tabular-nums transition-colors ${item === value ? 'text-ink font-semibold' : 'text-ink-subtle'}`}
               onClick={() => withFeedback(() => onChange(item))}
             >
               {String(item).padStart(2, '0')}
@@ -82,7 +82,7 @@ function WheelColumn({ label, value, options, onChange, withFeedback }) {
           ))}
           <div style={{ height: WHEEL_ITEM_HEIGHT * WHEEL_PADDING_ROWS }} />
         </div>
-        <div className="pointer-events-none absolute left-2 right-2 top-1/2 h-10 -translate-y-1/2 rounded-xl border border-[rgba(60,60,67,0.2)] bg-white/35" />
+        <div className="pointer-events-none absolute left-2 right-2 top-1/2 h-10 -translate-y-1/2 rounded-xl border border-white/40 bg-white/30" />
       </div>
     </div>
   )
@@ -102,7 +102,7 @@ function TimeWheelPicker({ valueSeconds, onChange, withFeedback }) {
 
   return (
     <div className="ios-list-group shadow-sm w-full max-w-[360px] p-4">
-      <p className="mb-3 text-[16px] font-medium text-[#1c1c1e] text-center">自定义时长</p>
+      <p className="text-ink mb-3 text-center text-[16px] font-medium">自定义时长</p>
       <div className="flex gap-3">
         <WheelColumn label="时" value={hours} options={hourOptions} onChange={(h) => updateValue(h, minutes, seconds)} withFeedback={withFeedback} />
         <WheelColumn label="分" value={minutes} options={minuteSecondOptions} onChange={(m) => updateValue(hours, m, seconds)} withFeedback={withFeedback} />
@@ -115,11 +115,11 @@ function TimeWheelPicker({ valueSeconds, onChange, withFeedback }) {
 function CustomDurationModal({ valueSeconds, onChange, onClose, withFeedback }) {
   return createPortal(
     <div className="fixed inset-0 z-[75] flex items-end justify-center bg-black/45 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="w-full h-fit bg-[#f2f2f7] rounded-t-[28px] pt-3 pb-safe-bottom px-4 shadow-2xl animate-sheet-up border-t border-[rgba(60,60,67,0.2)]" onClick={(event) => event.stopPropagation()}>
+      <div className="glass-card w-full h-fit rounded-t-[28px] border-t border-white/45 px-4 pb-safe-bottom pt-3 shadow-2xl animate-sheet-up" onClick={(event) => event.stopPropagation()}>
         <div className="mx-auto mb-2 h-1.5 w-12 rounded-full bg-[#c7c7cc]" />
         <div className="flex items-center justify-between px-1 pb-2">
-          <p className="text-[17px] font-semibold text-[#1c1c1e]">设置自定义时长</p>
-          <button type="button" onClick={onClose} className="h-8 px-3 rounded-lg bg-[#007aff] text-white text-[14px] font-semibold active:opacity-80">完成</button>
+          <p className="text-ink text-[17px] font-semibold">设置自定义时长</p>
+          <button type="button" onClick={onClose} className="liquid-primary liquid-ripple h-8 rounded-lg px-3 text-[14px] font-semibold active:opacity-80">完成</button>
         </div>
         <TimeWheelPicker valueSeconds={valueSeconds} onChange={onChange} withFeedback={withFeedback} />
       </div>
@@ -162,19 +162,22 @@ function HistoryModal({ sessions, onClose, onDeleteEntry, onSaveNote, withFeedba
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-xl animate-fade-in" onClick={onClose}>
-      <div className="w-full h-fit bg-[#f2f2f7]/95 backdrop-blur-xl rounded-t-[32px] pt-3 pb-safe-bottom px-0 shadow-2xl relative animate-sheet-up" onClick={(event) => event.stopPropagation()}>
+      <div className="glass-card relative h-fit w-full rounded-t-[32px] px-0 pb-safe-bottom pt-3 shadow-2xl animate-sheet-up" onClick={(event) => event.stopPropagation()}>
         <div className="mx-auto mb-2 h-1.5 w-12 rounded-full bg-[#c7c7cc]" />
         <div className="flex items-center justify-between px-5 py-2">
-          <h3 className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">工作时长历史</h3>
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => withFeedback(() => setShowStats((v) => !v))} className="text-[12px] font-semibold text-[#007aff] px-2 py-1 rounded-md bg-[rgba(0,122,255,0.1)] active:bg-[rgba(0,122,255,0.2)]">统计</button>
-            <button type="button" onClick={onClose} className="flex-shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-[rgba(60,60,67,0.18)] text-[#8e8e93] active:opacity-50 transition-opacity"><X size={16} strokeWidth={3} /></button>
-          </div>
+          <h3 className="text-ink text-[20px] font-bold tracking-tight">工作时长历史</h3>
+          <button
+            type="button"
+            onClick={() => withFeedback(() => setShowStats((v) => !v))}
+            className="liquid-ripple rounded-md bg-[rgba(34,197,195,0.18)] px-3 py-1.5 text-[15px] font-semibold text-[#0f766e] active:bg-[rgba(34,197,195,0.3)]"
+          >
+            每日
+          </button>
         </div>
 
         <div className="px-5 pb-8 pt-2">
-          {!showStats && sessions.length === 0 && <div className="ios-list-group p-6 text-center shadow-sm"><p className="text-[15px] text-[#8e8e93]">暂无历史记录</p></div>}
-          {showStats && dailyStats.length === 0 && <div className="ios-list-group p-6 text-center shadow-sm"><p className="text-[15px] text-[#8e8e93]">暂无统计数据</p></div>}
+          {!showStats && sessions.length === 0 && <div className="ios-list-group p-6 text-center shadow-sm"><p className="text-ink-subtle text-[15px]">暂无历史记录</p></div>}
+          {showStats && dailyStats.length === 0 && <div className="ios-list-group p-6 text-center shadow-sm"><p className="text-ink-subtle text-[15px]">暂无统计数据</p></div>}
 
           {showStats && dailyStats.length > 0 && (
             <div className="ios-list-group shadow-sm">
@@ -219,22 +222,22 @@ function HistoryModal({ sessions, onClose, onDeleteEntry, onSaveNote, withFeedba
 
       {selectedEntry && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 px-4 pb-6 animate-fade-in" onClick={() => setSelectedEntry(null)}>
-          <div className="w-full max-w-[360px] rounded-2xl bg-white border border-[rgba(60,60,67,0.24)] shadow-2xl overflow-hidden" onClick={(event) => event.stopPropagation()}>
-            <button type="button" className="ios-list-row w-full text-[17px] text-[#007aff] bg-white active:bg-[#f2f2f7]" onClick={() => withFeedback(() => { setNoteDraft(selectedEntry.note ?? ''); setShowNoteEditor(true) })}>编辑备注</button>
-            <button type="button" className="ios-list-row w-full text-[17px] text-[#ff3b30] bg-white active:bg-[#f2f2f7]" onClick={() => withFeedback(() => { onDeleteEntry(selectedEntry.id); setSelectedEntry(null) })}>删除记录</button>
-            <button type="button" className="ios-list-row w-full text-[17px] text-[#8e8e93] bg-white active:bg-[#f2f2f7]" onClick={() => setSelectedEntry(null)}>取消</button>
+          <div className="ios-list-group w-full max-w-[360px] overflow-hidden rounded-2xl shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="ios-list-row liquid-ripple w-full text-[17px] text-[#2d78dc] active:bg-white/20" onClick={() => withFeedback(() => { setNoteDraft(selectedEntry.note ?? ''); setShowNoteEditor(true) })}>编辑备注</button>
+            <button type="button" className="ios-list-row liquid-ripple w-full text-[17px] text-[#ff3b30] active:bg-white/20" onClick={() => withFeedback(() => { onDeleteEntry(selectedEntry.id); setSelectedEntry(null) })}>删除记录</button>
+            <button type="button" className="ios-list-row liquid-ripple w-full text-[17px] text-[#5f7595] active:bg-white/20" onClick={() => setSelectedEntry(null)}>取消</button>
           </div>
         </div>
       )}
 
       {showNoteEditor && selectedEntry && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/35 px-4 animate-fade-in" onClick={() => setShowNoteEditor(false)}>
-          <div className="w-full max-w-[360px] rounded-2xl bg-white p-4 shadow-2xl border border-[rgba(60,60,67,0.2)]" onClick={(event) => event.stopPropagation()}>
-            <p className="text-[17px] font-semibold text-[#1c1c1e] mb-3">备注 {formatDateKey(selectedEntry.startAt)}</p>
-            <textarea value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="输入备注" rows={4} className="w-full rounded-xl bg-[rgba(118,118,128,0.12)] px-3 py-2 text-[15px] text-[#1c1c1e] outline-none resize-none" />
+          <div className="glass-card w-full max-w-[360px] rounded-2xl border border-white/45 p-4 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <p className="text-ink mb-3 text-[17px] font-semibold">备注 {formatDateKey(selectedEntry.startAt)}</p>
+            <textarea value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="输入备注" rows={4} className="glass-soft text-ink w-full resize-none rounded-xl px-3 py-2 text-[15px] outline-none" />
             <div className="mt-3 flex gap-2">
-              <button type="button" className="flex-1 h-10 rounded-xl bg-[rgba(118,118,128,0.18)] text-[15px] font-medium text-[#1c1c1e]" onClick={() => setShowNoteEditor(false)}>取消</button>
-              <button type="button" className="flex-1 h-10 rounded-xl bg-[#007aff] text-[15px] font-semibold text-white" onClick={() => withFeedback(() => { onSaveNote(selectedEntry.id, noteDraft); setShowNoteEditor(false); setSelectedEntry(null) })}>保存</button>
+              <button type="button" className="liquid-outline h-10 flex-1 rounded-xl text-[15px] font-medium" onClick={() => setShowNoteEditor(false)}>取消</button>
+              <button type="button" className="liquid-primary liquid-ripple h-10 flex-1 rounded-xl text-[15px] font-semibold" onClick={() => withFeedback(() => { onSaveNote(selectedEntry.id, noteDraft); setShowNoteEditor(false); setSelectedEntry(null) })}>保存</button>
             </div>
           </div>
         </div>
@@ -296,8 +299,7 @@ export default function FocusPage({
 
   return (
     <section
-      className={`animate-fade-in flex min-h-full flex-col items-center justify-center gap-6 relative transition-all duration-300 ${activeTimerMode === 'custom' ? 'mt-[-4px]' : 'mt-[-20px]'
-        }`}
+      className="animate-fade-in relative flex min-h-full flex-col items-center justify-center gap-6 pt-2 transition-all duration-300"
     >
       {needsPermissionGuide && (
         <div className="w-full rounded-[14px] bg-[rgba(255,59,48,0.1)] px-4 py-3 text-left backdrop-blur-md">
@@ -308,8 +310,7 @@ export default function FocusPage({
       )}
 
       <div
-        className={`relative w-full max-w-[320px] rounded-[10px] bg-[rgba(120,120,128,0.16)] p-[2px] transition-all duration-300 ${activeTimerMode === 'custom' ? 'mt-3' : 'mt-0'
-          }`}
+        className="relative mt-3 w-full max-w-[320px] rounded-[10px] bg-[rgba(120,120,128,0.16)] p-[2px] transition-all duration-300"
       >
         <div
           className="absolute left-[2px] top-[2px] h-[30px] rounded-[8px] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.12)] transition-transform duration-300 ease-out"
@@ -350,7 +351,7 @@ export default function FocusPage({
           }`}
       >
         <div className="w-full flex flex-col items-center gap-4">
-          <button type="button" onClick={() => withFeedback(() => setShowCustomPicker(true))} className="h-10 px-4 rounded-full bg-[rgba(0,122,255,0.12)] border border-[rgba(0,122,255,0.18)] text-[#007aff] text-[14px] font-semibold shadow-sm active:bg-[rgba(0,122,255,0.2)]">
+          <button type="button" onClick={() => withFeedback(() => setShowCustomPicker(true))} className="liquid-outline liquid-ripple h-10 rounded-full px-4 text-[14px] font-semibold text-[#2d78dc]">
             自定义时长: {formatDurationHMS(customDurationSeconds)}
           </button>
           <div className="ios-list-group w-full shadow-sm px-4 py-2">
@@ -376,8 +377,8 @@ export default function FocusPage({
             <circle cx="120" cy="120" r={radius} fill="none" stroke="var(--ios-blue)" strokeWidth={strokeWidth} strokeLinecap="round" strokeDasharray={circleCircumference} strokeDashoffset={strokeOffset} className="transition-all duration-1000 ease-linear" />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-            <span className="text-[64px] font-bold text-[#1c1c1e] tabular-nums tracking-tight leading-none mb-1">{formatTime(remainingSeconds)}</span>
-            <span className="text-[15px] font-medium text-[#8e8e93]">{modeStatusText}</span>
+            <span className="text-ink mb-1 text-[64px] font-bold leading-none tabular-nums tracking-tight">{formatTime(remainingSeconds)}</span>
+            <span className="text-ink-subtle text-[15px] font-medium">{modeStatusText}</span>
           </div>
         </div>
 
@@ -401,7 +402,7 @@ export default function FocusPage({
               setIsPaused(false)
               void scheduleTimerNotification(remainingSeconds, activeTimerMode)
             })}
-            className={`w-full rounded-full py-[14px] text-[17px] font-semibold transition-all active:scale-95 shadow-md ${isRunning ? 'bg-[#f2f2f7] text-[#ff3b30] active:bg-[#e5e5ea]' : 'bg-[#007aff] text-white active:bg-[#006ee6]'}`}
+            className={`w-full rounded-full py-[14px] text-[17px] font-semibold transition-all active:scale-95 ${isRunning ? 'liquid-outline text-[#ff3b30]' : 'liquid-primary liquid-ripple'}`}
           >
             {isRunning ? '暂停' : isPaused ? '继续' : '开始'}
           </button>
@@ -434,13 +435,13 @@ export default function FocusPage({
               setRemainingSeconds(currentModeDurationSeconds)
               void cancelTimerNotification()
             })}
-            className="mt-4 text-[15px] text-[#8e8e93] active:text-[#1c1c1e] font-medium transition-colors"
+            className="text-ink-subtle mt-4 text-[15px] font-medium transition-colors active:text-[#304968]"
           >
             重置计时
           </button>
         )}
 
-        <button type="button" onClick={() => withFeedback(() => setShowHistory(true))} className="mt-4 inline-flex items-center gap-2 rounded-full bg-[rgba(0,122,255,0.1)] px-4 py-2 text-[14px] font-medium text-[#007aff] transition active:bg-[rgba(0,122,255,0.2)]">
+        <button type="button" onClick={() => withFeedback(() => setShowHistory(true))} className="liquid-outline liquid-ripple mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[14px] font-medium text-[#2d78dc] transition">
           <History size={15} />
           历史记录
         </button>
