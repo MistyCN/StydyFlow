@@ -50,7 +50,7 @@ export default function SportPage({ withFeedback }) {
   return (
     <section className="animate-fade-in flex min-h-full flex-col gap-4 pt-2">
       <div className="flex items-end justify-between px-1">
-        <span className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">跑步记录</span>
+        <span className="text-ink text-[20px] font-bold tracking-tight">跑步记录</span>
         <button
           type="button"
           onClick={() => withFeedback(() => setShowForm((v) => !v))}
@@ -63,9 +63,9 @@ export default function SportPage({ withFeedback }) {
 
       {runs.length > 0 && (
         <div className="ios-list-group shadow-sm p-5 text-center flex flex-col items-center">
-          <p className="text-[13px] font-semibold text-[#8e8e93] tracking-widest uppercase mb-1">总里程</p>
+          <p className="text-ink-subtle mb-1 text-[13px] font-semibold tracking-widest uppercase">总里程</p>
           <p className="text-[52px] font-bold tabular-nums text-[#007aff] leading-none tracking-tight">
-            {totalKm.toFixed(1)} <span className="text-[20px] font-medium text-[#8e8e93]">km</span>
+            {totalKm.toFixed(1)} <span className="text-ink-subtle text-[20px] font-medium">km</span>
           </p>
         </div>
       )}
@@ -76,11 +76,11 @@ export default function SportPage({ withFeedback }) {
             type="date"
             value={draft.date}
             onChange={(e) => setDraft((d) => ({ ...d, date: e.target.value }))}
-            className="h-10 w-full rounded-xl bg-[rgba(118,118,128,0.12)] px-4 text-[17px] text-[#1c1c1e] outline-none"
+            className="glass-soft text-ink h-10 w-full rounded-xl px-4 text-[17px] outline-none"
           />
           <div className="ios-list-group p-4 shadow-none border-none bg-[rgba(118,118,128,0.06)]">
             <div className="flex justify-between items-baseline mb-3">
-              <p className="text-[15px] font-semibold text-[#1c1c1e]">单次里程</p>
+              <p className="text-ink text-[15px] font-semibold">单次里程</p>
               <p className="text-[28px] font-bold tabular-nums text-[#007aff]">{draft.km} <span className="text-[15px]">km</span></p>
             </div>
             <input
@@ -92,7 +92,7 @@ export default function SportPage({ withFeedback }) {
               onChange={(e) => setDraft((d) => ({ ...d, km: parseFloat(e.target.value) }))}
               className="w-full accent-[#007aff]"
             />
-            <div className="flex justify-between text-[11px] text-[#8e8e93] font-medium mt-1 px-1">
+            <div className="text-ink-subtle mt-1 flex justify-between px-1 text-[11px] font-medium">
               <span>0.5k</span>
               <span>42k</span>
             </div>
@@ -100,7 +100,7 @@ export default function SportPage({ withFeedback }) {
           <button
             type="button"
             onClick={() => withFeedback(addRun)}
-            className="h-[44px] w-full rounded-xl bg-[#007aff] text-[17px] font-semibold text-white transition-opacity active:opacity-70"
+            className="liquid-primary liquid-ripple h-[44px] w-full rounded-xl text-[17px] font-semibold transition-opacity active:opacity-70"
           >
             完成保存
           </button>
@@ -109,7 +109,7 @@ export default function SportPage({ withFeedback }) {
 
       {runs.length === 0 && !showForm && (
         <div className="ios-list-group p-6 text-center shadow-sm">
-          <p className="text-[15px] text-[#8e8e93]">暂无记录，点击右上角开始记录。</p>
+          <p className="text-ink-subtle text-[15px]">暂无记录，点击右上角开始记录。</p>
         </div>
       )}
 
@@ -120,8 +120,8 @@ export default function SportPage({ withFeedback }) {
               <div className="h-2 w-2 rounded-full bg-[#007aff]" />
             </div>
             <div className="flex-1 flex flex-col justify-center">
-              <p className="text-[19px] font-semibold text-[#1c1c1e] leading-snug">{run.km} km</p>
-              <p className="text-[13px] text-[#8e8e93] font-medium mt-0.5">{run.date}</p>
+              <p className="text-ink text-[19px] font-semibold leading-snug">{run.km} km</p>
+              <p className="text-ink-subtle mt-0.5 text-[13px] font-medium">{run.date}</p>
             </div>
             <button
               type="button"

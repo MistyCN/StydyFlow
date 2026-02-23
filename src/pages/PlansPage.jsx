@@ -25,14 +25,14 @@ export default function PlansPage({
                 addPlan()
               }
             }}
-            className="w-full h-[36px] rounded-[10px] bg-[rgba(118,118,128,0.12)] pl-4 pr-10 text-[15px] text-[#1c1c1e] placeholder-[#3c3c43]/60 outline-none backdrop-blur-md"
+            className="glass-soft text-ink h-[38px] w-full rounded-[12px] pl-4 pr-10 text-[15px] placeholder:text-[#5d7292] outline-none"
             placeholder="添加新计划"
           />
         </div>
         <button
           type="button"
           onClick={() => withFeedback(addPlan)}
-          className="h-[36px] w-[36px] flex items-center justify-center rounded-full bg-[rgba(0,122,255,0.1)] text-[#007aff] transition-colors active:bg-[rgba(0,122,255,0.2)]"
+          className="liquid-primary liquid-ripple flex h-[38px] w-[38px] items-center justify-center rounded-full transition-all active:scale-95"
           aria-label="Add plan"
         >
           <Plus size={20} strokeWidth={2.5} />
@@ -40,8 +40,8 @@ export default function PlansPage({
       </div>
 
       <div className="flex items-end justify-between px-1">
-        <span className="text-[20px] font-bold text-[#1c1c1e] tracking-tight">我的计划</span>
-        <span className="text-[13px] font-medium text-[#8e8e93] mb-[2px]">
+        <span className="text-ink text-[20px] font-bold tracking-tight">我的计划</span>
+        <span className="text-ink-subtle mb-[2px] text-[13px] font-medium">
           {doneCount}/{plans.length}
         </span>
       </div>
@@ -49,7 +49,7 @@ export default function PlansPage({
       <div className="pb-4">
         {plans.length === 0 && (
           <div className="ios-list-group p-6 text-center shadow-sm">
-            <p className="text-[15px] text-[#8e8e93]">暂无计划，从上面添加一条任务。</p>
+            <p className="text-ink-subtle text-[15px]">暂无计划，从上面添加一条任务。</p>
           </div>
         )}
 
@@ -77,13 +77,13 @@ export default function PlansPage({
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     <p
                       className={`text-[16px] leading-[1.3] truncate transition-colors ${plan.completed
-                        ? 'text-[#8e8e93] line-through'
-                        : 'text-[#1c1c1e]'
+                        ? 'text-[#6c81a0] line-through'
+                        : 'text-ink'
                         }`}
                     >
                       {plan.title}
                     </p>
-                    <p className="text-[12px] text-[#aeaeb2] mt-1">
+                    <p className="mt-1 text-[12px] text-[#8092ac]">
                       {formatPlanTime(plan.updatedAt)}
                     </p>
                   </div>

@@ -14,8 +14,8 @@ export default defineConfig({
         name: 'StudyFlow',
         short_name: 'StudyFlow',
         description: 'A lightweight study app with focus timer and task planning.',
-        theme_color: '#f2f2f7',
-        background_color: '#f2f2f7',
+        theme_color: '#9cb8d8',
+        background_color: '#9cb8d8',
         display: 'standalone',
         start_url: '/',
         icons: [
