@@ -161,7 +161,7 @@ function HistoryModal({ sessions, onClose, onDeleteEntry, onSaveNote, withFeedba
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-xl animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#0e1f37]/22 backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div className="glass-card relative h-fit w-full rounded-t-[32px] px-0 pb-safe-bottom pt-3 shadow-2xl animate-sheet-up" onClick={(event) => event.stopPropagation()}>
         <div className="mx-auto mb-2 h-1.5 w-12 rounded-full bg-[#c7c7cc]" />
         <div className="flex items-center justify-between px-5 py-2">
@@ -176,11 +176,11 @@ function HistoryModal({ sessions, onClose, onDeleteEntry, onSaveNote, withFeedba
         </div>
 
         <div className="px-5 pb-8 pt-2">
-          {!showStats && sessions.length === 0 && <div className="ios-list-group p-6 text-center shadow-sm"><p className="text-ink-subtle text-[15px]">暂无历史记录</p></div>}
-          {showStats && dailyStats.length === 0 && <div className="ios-list-group p-6 text-center shadow-sm"><p className="text-ink-subtle text-[15px]">暂无统计数据</p></div>}
+          {!showStats && sessions.length === 0 && <div className="ios-list-group ios-list-group-strong p-6 text-center shadow-sm"><p className="text-ink-subtle text-[15px]">暂无历史记录</p></div>}
+          {showStats && dailyStats.length === 0 && <div className="ios-list-group ios-list-group-strong p-6 text-center shadow-sm"><p className="text-ink-subtle text-[15px]">暂无统计数据</p></div>}
 
           {showStats && dailyStats.length > 0 && (
-            <div className="ios-list-group shadow-sm">
+            <div className="ios-list-group ios-list-group-strong shadow-sm">
               {dailyStats.map((row) => (
                 <div key={row.date} className="ios-list-row min-h-[52px]">
                   <span className="text-[17px] text-[#1c1c1e]">{row.date}</span>
@@ -193,7 +193,7 @@ function HistoryModal({ sessions, onClose, onDeleteEntry, onSaveNote, withFeedba
           {!showStats && sessions.length > 0 && (
             <>
               <p className="mb-2 px-2 text-[12px] text-[#8e8e93]">长按条目可删除或备注</p>
-              <div className="ios-list-group shadow-sm">
+              <div className="ios-list-group ios-list-group-strong shadow-sm">
                 {sessions.map((entry) => (
                   <button
                     key={entry.id}
@@ -221,8 +221,14 @@ function HistoryModal({ sessions, onClose, onDeleteEntry, onSaveNote, withFeedba
       </div>
 
       {selectedEntry && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 px-4 pb-6 animate-fade-in" onClick={() => setSelectedEntry(null)}>
-          <div className="ios-list-group w-full max-w-[360px] overflow-hidden rounded-2xl shadow-2xl" onClick={(event) => event.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-[#0e1f37]/22 backdrop-blur-sm px-4 pb-6 animate-fade-in"
+          onClick={(event) => {
+            event.stopPropagation()
+            setSelectedEntry(null)
+          }}
+        >
+          <div className="ios-list-group ios-list-group-strong w-full max-w-[360px] overflow-hidden rounded-2xl shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <button type="button" className="ios-list-row liquid-ripple w-full text-[17px] text-[#2d78dc] active:bg-white/20" onClick={() => withFeedback(() => { setNoteDraft(selectedEntry.note ?? ''); setShowNoteEditor(true) })}>编辑备注</button>
             <button type="button" className="ios-list-row liquid-ripple w-full text-[17px] text-[#ff3b30] active:bg-white/20" onClick={() => withFeedback(() => { onDeleteEntry(selectedEntry.id); setSelectedEntry(null) })}>删除记录</button>
             <button type="button" className="ios-list-row liquid-ripple w-full text-[17px] text-[#5f7595] active:bg-white/20" onClick={() => setSelectedEntry(null)}>取消</button>

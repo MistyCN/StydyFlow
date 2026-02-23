@@ -11,7 +11,9 @@ function loadCountdowns() {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed)) return parsed
     }
-  } catch { }
+  } catch {
+    // ignore corrupted local data
+  }
   return []
 }
 
@@ -38,7 +40,7 @@ function CountdownModal({ item, onClose }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-xl animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[#0e1f37]/22 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -49,7 +51,11 @@ function CountdownModal({ item, onClose }) {
 
         <div className="flex items-center justify-between px-5 py-2">
           <h3 className="text-ink truncate pr-4 text-[20px] font-bold tracking-tight">{item.title}</h3>
-          <button type="button" onClick={onClose} className="flex-shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-[rgba(60,60,67,0.18)] text-[#8e8e93] active:opacity-50 transition-opacity">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-[rgba(60,60,67,0.18)] text-[#8e8e93] active:opacity-50 transition-opacity"
+          >
             <X size={16} strokeWidth={3} />
           </button>
         </div>
@@ -64,7 +70,7 @@ function CountdownModal({ item, onClose }) {
             </p>
           </div>
 
-          <div className="ios-list-group shadow-sm">
+          <div className="ios-list-group ios-list-group-strong shadow-sm">
             <div className="ios-list-row min-h-[44px]">
               <div className="flex items-center gap-3">
                 <CalendarDays size={20} className="text-[#007aff]" strokeWidth={2.5} />
@@ -85,7 +91,7 @@ function CountdownModal({ item, onClose }) {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   )
 }
 
@@ -186,7 +192,10 @@ export default function CountdownPage({ withFeedback }) {
                 </div>
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); withFeedback(() => deleteItem(item.id)) }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    withFeedback(() => deleteItem(item.id))
+                  }}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(255,59,48,0.1)] text-[#ff3b30] transition-opacity active:opacity-50 flex-shrink-0"
                   aria-label="Delete"
                 >

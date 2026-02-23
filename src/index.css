@@ -302,6 +302,11 @@ body::after {
   pointer-events: none;
 }
 
+.ios-list-group-strong {
+  background: linear-gradient(146deg, rgba(250, 253, 255, 0.72), rgba(219, 233, 248, 0.5));
+  border-color: rgba(255, 255, 255, 0.62);
+}
+
 .ios-list-row {
   display: flex;
   align-items: center;

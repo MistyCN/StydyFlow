@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Activity, BookOpenText, CalendarDays, Clock3, Settings, Sparkles } from 'lucide-react'
@@ -132,6 +132,7 @@ function App() {
   const [customCountsAsWork, setCustomCountsAsWork] = useState(false)
   const [customDurationSeconds, setCustomDurationSeconds] = useState(DEFAULT_CUSTOM_DURATION_SECONDS)
   const [workHistory, setWorkHistory] = useState(() => loadWorkHistory())
+  const completionRecordKeyRef = useRef(null)
   const needsPermissionGuide = !notificationEnabled || (settings.developerMode && !exactAlarmGranted)
 
   const workDurationSeconds = FOCUS_DURATION_SECONDS
@@ -329,21 +330,25 @@ function App() {
               ? currentSessionDurationSeconds
               : getModeDuration(activeTimerMode)
           const startAt = currentSessionStartedAt ?? (endAt - durationSeconds * 1000)
-          setWorkHistory((previous) => {
-            const nextHistory = [
-              {
-                id: crypto.randomUUID(),
-                startAt,
-                endAt,
-                durationSeconds,
-                note: '',
-                sourceMode: activeTimerMode,
-              },
-              ...previous,
-            ]
-            saveWorkHistory(nextHistory)
-            return nextHistory
-          })
+          const recordKey = `${startAt}-${durationSeconds}-${activeTimerMode}`
+          if (completionRecordKeyRef.current !== recordKey) {
+            completionRecordKeyRef.current = recordKey
+            setWorkHistory((previous) => {
+              const nextHistory = [
+                {
+                  id: crypto.randomUUID(),
+                  startAt,
+                  endAt,
+                  durationSeconds,
+                  note: '',
+                  sourceMode: activeTimerMode,
+                },
+                ...previous,
+              ]
+              saveWorkHistory(nextHistory)
+              return nextHistory
+            })
+          }
         }
         setIsRunning(false)
         setIsPaused(false)
@@ -389,6 +394,7 @@ function App() {
 
   useEffect(() => {
     if (!isRunning && !isPaused) {
+      completionRecordKeyRef.current = null
       setRemainingSeconds(getModeDuration(activeTimerMode))
       if (timerEndAt === null) {
         setCurrentSessionStartedAt(null)
@@ -501,7 +507,7 @@ function App() {
         <div className="absolute -left-10 top-8 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(229,250,255,0.75),rgba(167,202,241,0.15)_70%)] blur-2xl" />
         <div className="absolute -right-12 bottom-14 h-60 w-60 rounded-full bg-[radial-gradient(circle,rgba(143,201,255,0.45),rgba(145,180,229,0.08)_70%)] blur-2xl" />
       </div>
-      <div className="relative flex h-[100svh] w-full flex-col overflow-hidden border-white/10 bg-[linear-gradient(165deg,rgba(248,252,255,0.3),rgba(202,224,247,0.14))] sm:h-[96svh] sm:w-auto sm:max-h-[900px] sm:aspect-[9/19.5] sm:rounded-[2.5rem] sm:border sm:shadow-[0_26px_68px_rgba(23,46,78,0.4)]">
+      <div className="relative flex h-[100lvh] w-full flex-col overflow-hidden border-white/10 bg-[linear-gradient(165deg,rgba(248,252,255,0.3),rgba(202,224,247,0.14))] sm:h-[96svh] sm:w-auto sm:max-h-[900px] sm:aspect-[9/19.5] sm:rounded-[2.5rem] sm:border sm:shadow-[0_26px_68px_rgba(23,46,78,0.4)]">
 
         {/* iOS Header */}
         <header className="glass-card sticky top-0 z-20 h-fit flex-none rounded-none border-x-0 border-t-0 border-b border-b-white/35 px-4 pb-3 pt-4">
@@ -687,5 +693,3 @@ function App() {
 }
 
 export default App
-
-
