@@ -43,3 +43,5 @@ android/app/src/main/assets/public
 *.sln
 *.sw?
 Thumbs.db
+
+claude.md
